@@ -10,7 +10,7 @@ export default class ObservableObject extends ExtendableProxy {
      */
     constructor(object) {
         const parameters = { target: object, handler: {} };
-        super(parameters);
+        super(parameters, true);
         parameters.handler.get = this.#OnGet.bind(this);
         parameters.handler.set = this.#OnSet.bind(this);
     }
@@ -57,6 +57,7 @@ export default class ObservableObject extends ExtendableProxy {
      * @param {*} object
      * @param {string | symbol} key
      * @param {*} value
+     * @returns {boolean}
      */
     #OnSet(object, key, value) {
         const isAdded = !!object[key];
@@ -70,5 +71,7 @@ export default class ObservableObject extends ExtendableProxy {
         if (isAdded)
             this.#Dispatch("add", object, key, value);
         this.#Dispatch("set", object, key, value);
+
+        return true;
     }
 }

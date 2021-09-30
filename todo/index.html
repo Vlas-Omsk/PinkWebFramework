@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="module" src="../src/Framework.js"></script>
+
+    <style>
+        button {
+            font-family: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+            background-color: initial;
+            border: none;
+            text-transform: inherit;
+            cursor: pointer;
+            color: inherit;
+            background-color: initial;
+        }
+    </style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .todo__title {
+            text-align: center;
+            margin: 40px 0 0 0;
+        }
+        .todo__container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .todo__items {
+            padding: 0;
+            width: 100vw;
+            max-width: 400px;
+        }
+        .todo__add {
+            color: white;
+            font-weight: bold;
+            background-color: red;
+            border-radius: 5px;
+            padding: 5px 20px;
+            margin: 0 auto;
+        }
+    </style>
+    <script>
+        // #region Костыль, так как type="module" загружаеться асинхронно
+        window.addEventListener("FrameworkInitialization", () => {
+        // #endregion
+            window.items = new ObservableArray([
+                "Купить хлеб",
+                "Купить масло",
+                "Купить купить"
+            ]);
+            window.increment = 4;
+        });
+    </script>
+</head>
+<body>
+    <h1 class="todo__title">Todo application</h1>
+    <hr/>
+    <div class="todo__container">
+        <ul class="todo__items">
+            <component src="TodoItem.html" for="item of items"></component>
+        </ul>
+        <button class="todo__add" @click="this.increment++; this.items.Push('Test' + increment)">Добавить</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="../src/Framework.js"></script>
+    <script>
+        window.addEventListener("FrameworkInitialization", () => {
+            window.tag = new ObservableObject({value: 123, value2: 456});
+            window.i2 = 2222222222;
+
+            window.getValue = function() {
+                return this.i2;
+            }
+        });
+    </script>
+    <title>Document</title>
+</head>
+<body attr1="{{this.tag.value}}">
+    <div for="var ii = 2; ii < 3; ii++">
+        <component src="component.html" for="var i = 2; i < 10; i++" idx="{{this.i}}"></component>
+    </div>
+
+    <!-- <h1>{{this.tag.value2}}</h1>
+    <div for="var i = 2; i < 10; i++" idx="{{this.i}}">
+        {{this.i}}d
+        <div for="i2 = 0; i2 < 10; i2++">
+            {{this.getValue(window)}}
+        </div>
+    </div> -->
+    <!-- <div for="let i in arr">
+        {{this.tag.value}}
+    </div>
+    <div for="var i of arr2">
+        {{this.tag.value}}
+    </div>
+    <div for="i of arr3">
+        {{this.tag.value}}
+    </div> -->
+</body>
+</html>

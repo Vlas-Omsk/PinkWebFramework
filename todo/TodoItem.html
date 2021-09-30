@@ -1,0 +1,36 @@
+<component>
+    <li class="item">
+        <input type="checkbox" class="item__checkbox" @change="this.isChecked = !this.isChecked"/>
+        <div style="text-decoration: {{this.isChecked ? 'line-through' : 'none'}};">{{this.item}}</div>
+        <button class="item__close" @click="items.Remove(this.item)">&times;</button>
+    </li>
+</component>
+
+<script>
+    this.isChecked = false;
+</script>
+
+<style>
+.item {
+    display: flex;
+    justify-content: space-between;
+    justify-items: center;
+    align-items: center;
+    list-style: none;
+    padding: 10px 0;
+    margin: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.item__checkbox {
+    margin: 0 20px;
+}
+.item__close {
+    margin: 0 20px;
+    width: 30px;
+    height: 30px;
+    background-color: red;
+    border-radius: 100%;
+    color: white;
+}
+</style>
