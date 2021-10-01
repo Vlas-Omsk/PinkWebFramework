@@ -72,7 +72,7 @@
     <hr/>
     <div class="todo__container">
         <ul class="todo__items">
-            <component src="TodoItem.html" :hellow="items" for="item of items"></component>
+            <component src="TodoItem.html" for="item of items"></component>
         </ul>
         <button class="todo__add" @click="this.increment++; this.items.Push('Test' + increment)">Добавить</button>
     </div>

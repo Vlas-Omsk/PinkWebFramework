@@ -15,7 +15,7 @@ export default class ObservableObject extends ExtendableProxy {
      */
     constructor(object) {
         const parameters = { target: object, handler: {} };
-        super(parameters, true);
+        super(parameters, ObservableObject.prototype);
         parameters.handler.get = this.#OnGet.bind(this);
         parameters.handler.set = this.#OnSet.bind(this);
     }

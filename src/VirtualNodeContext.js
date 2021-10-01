@@ -50,11 +50,10 @@ export default class VirtualNodeContext extends ExtendableProxy {
      */
     constructor(virtualNode) {
         const parameters = { target: {}, handler: {} };
-        Object.setPrototypeOf(parameters.target, VirtualNodeContext.prototype);
-        super(parameters);
-        this.#object = parameters.target;
+        super(parameters, VirtualNodeContext.prototype);
         parameters.handler.get = this.#OnGet.bind(this);
         parameters.handler.set = this.#OnSet.bind(this);
+        this.#object = parameters.target;
         this.#virtualNode = virtualNode;
     }
 

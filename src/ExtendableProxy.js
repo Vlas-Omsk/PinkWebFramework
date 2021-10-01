@@ -3,11 +3,11 @@ export default class ExtendableProxy {
      * @param {Object} parameters
      * @param {Object} parameters.target
      * @param {ProxyHandler<>} parameters.handler
-     * @param {boolean} combineWithThis
+     * @param {object} prototype
      */
-    constructor(parameters, combineWithThis) {
-        if (combineWithThis)
-            parameters.target = Object.assign(this, parameters.target);
+    constructor(parameters, prototype) {
+        if (prototype)
+            Object.setPrototypeOf(parameters.target, prototype);
         return new Proxy(parameters.target, parameters.handler);
     }
 }

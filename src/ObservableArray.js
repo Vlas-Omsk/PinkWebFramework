@@ -1,3 +1,4 @@
+import { IndexOutOfRangeException } from "./Exceptions.js";
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
@@ -15,9 +16,8 @@ export default class ObservableArray extends ExtendableProxy {
      * @param {Object} object
      */
     constructor(object) {
-        Object.setPrototypeOf(object, ObservableArray.prototype);
         const parameters = { target: object, handler: {} };
-        super(parameters, false);
+        super(parameters, ObservableArray.prototype);
         parameters.handler.get = this.#OnGet.bind(this);
         parameters.handler.set = this.#OnSet.bind(this);
         this.#object = parameters.target;
@@ -38,12 +38,16 @@ export default class ObservableArray extends ExtendableProxy {
      * @param {number} index
      */
     RemoveAt(index) {
+        if (index < 0 || index >= this.#object.length)
+            throw new IndexOutOfRangeException("index");
+
         Array.removeAt(this.#object, index);
         this.#Dispatch("remove", this.#object, index, this.#object[index]);
     }
 
     /**
      * @param {any} item
+     * @returns {boolean}
      */
     Remove(item) {
         let index = -1;
@@ -53,8 +57,9 @@ export default class ObservableArray extends ExtendableProxy {
                 break;
             }
         if (index == -1)
-            throw Error("Item not contains in array");
+            return false;
         this.RemoveAt(index);
+        return true;
     }
 
     /**

@@ -1,3 +1,4 @@
+import { ComponentCanOnlyContainOneElement, ComponentRequiresSrcAttribute } from "../Exceptions.js";
 import VirtualNode from "../VirtualNode.js";
 import VirtualNodeContext from "../VirtualNodeContext.js";
 import AttributesInitializer from "./AttributesInitializer.js";
@@ -22,7 +23,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
 
         this.#source = virtualNode.HtmlAttributes["src"];
         if (!this.#source)
-            throw Error("Component requires src attribute");
+            throw new ComponentRequiresSrcAttribute();
         virtualNode.RemoveHtmlAttribute("src");
         
         this.Update();
@@ -38,7 +39,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         for (let children of childrens) {
             if (children.tagName == "COMPONENT") {
                 if (children.children.length > 1)
-                    throw new Error();
+                    throw new ComponentCanOnlyContainOneElement();
                 this.#dynamicElement = new VirtualNode(children.children[0]);
                 this.#dynamicElement.MakeDynamic(this.Element);
                 this.#dynamicElement.MakeComponent();

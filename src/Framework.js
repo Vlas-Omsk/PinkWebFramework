@@ -1,7 +1,22 @@
+// ./Attributes/
 import AttributesInitializer from "./Attributes/AttributesInitializer.js";
-import ForElement from "./Attributes/ForAttribute.js";
-import ValueElement from "./Attributes/ValueAttribute.js";
+import ComponentAttribute from "./Attributes/ComponentAttribute.js";
+import EventAttribute from "./Attributes/EventAttribute.js";
+import ForAttribute from "./Attributes/ForAttribute.js";
+import PropsAttribute from "./Attributes/PropsAttribute.js";
+import ValueAttribute from "./Attributes/ValueAttribute.js";
 import VirtualNodeAttribute from "./Attributes/VirtualNodeAttribute.js";
+
+window.AttributesInitializer = AttributesInitializer;
+window.ComponentAttribute = ComponentAttribute;
+window.EventAttribute = EventAttribute;
+window.ForAttribute = ForAttribute;
+window.PropsAttribute = PropsAttribute;
+window.ValueAttribute = ValueAttribute;
+window.VirtualNodeAttribute = VirtualNodeAttribute;
+
+// ./
+import * as Exceptions from "./Exceptions.js";
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
@@ -10,13 +25,15 @@ import ObservableObject from "./ObservableObject.js";
 import VirtualNode from "./VirtualNode.js";
 import VirtualNodeContext from "./VirtualNodeContext.js";
 
+window.IndexOutOfRangeException = Exceptions.IndexOutOfRangeException;
+window.NotImplementedException = Exceptions.NotImplementedException;
+window.ComponentRequiresSrcAttribute = Exceptions.ComponentRequiresSrcAttribute;
+window.ComponentCanOnlyContainOneElement = Exceptions.ComponentCanOnlyContainOneElement;
 window.ExtendableProxy = ExtendableProxy;
-window.ForElement = ForElement;
 window.FrameworkEventTarget = FrameworkEventTarget;
 window.GlobalObserverHandler = GlobalObserverHandler;
 window.ObservableArray = ObservableArray;
 window.ObservableObject = ObservableObject;
-window.ValueElement = ValueElement;
 window.VirtualNode = VirtualNode;
 window.VirtualNodeContext = VirtualNodeContext;
 
