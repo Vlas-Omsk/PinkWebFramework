@@ -41,10 +41,10 @@ String.isNullOrEmpty = function(self) {
     return (!self || self.length === 0 || !self.trim());
 }
 Array.insert = function(self, index, item) {
-    self.splice(index, 0, item);
+    Array.prototype.splice.call(self, index, 0, item)
 };
 Array.removeAt = function(self, index) {
-    self.splice(index, 1);
+    Array.prototype.splice.call(self, index, 1)
 };
 
 const framework = new Framework();

@@ -3,6 +3,7 @@ import VirtualNode from "../VirtualNode.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
 export const testRegex = /{{(.*?)}}/;
+export const testRegexGlobal = /{{(.*?)}}/g;
 
 export default class ValueAttribute extends VirtualNodeAttribute {
     /** @type {string} */ #templateValue
@@ -49,7 +50,7 @@ export default class ValueAttribute extends VirtualNodeAttribute {
      * @returns {string}
      */
     #Eval(value) {
-        return value.replace(testRegex, function(_, e) {
+        return value.replaceAll(testRegexGlobal, function(_, e) {
             try {
                 return eval(e);
             } catch(ex) {

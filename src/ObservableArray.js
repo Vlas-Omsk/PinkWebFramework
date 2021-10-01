@@ -1,14 +1,26 @@
+import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
+import ObservableObject from "./ObservableObject.js";
 
-export default class ObservableArray {
+export default class ObservableArray extends ExtendableProxy {
     /** @type {FrameworkEventTarget} */ #eventTarget = new FrameworkEventTarget()
     /** @type {any[]} */ #object = []
+
+    get IObservable() {
+        return true;
+    }
+
     /**
      * @param {Object} object
      */
     constructor(object) {
-        this.#object = object;
+        Object.setPrototypeOf(object, ObservableArray.prototype);
+        const parameters = { target: object, handler: {} };
+        super(parameters, false);
+        parameters.handler.get = this.#OnGet.bind(this);
+        parameters.handler.set = this.#OnSet.bind(this);
+        this.#object = parameters.target;
     }
 
     /**
@@ -17,7 +29,7 @@ export default class ObservableArray {
     Push(...items) {
         let idx = this.#object.length;
         for (let i = idx; i < idx + items.length; i++) {
-            this.#object[i] = items[i - idx];
+            this.#object[i] = this.#ProcessValue(items[i - idx]);
             this.#Dispatch("add", this.#object, i, this.#object[i]);
         }
     }
@@ -51,8 +63,9 @@ export default class ObservableArray {
      */
     Insert(index, ...items) {
         for (let i = index; i < index + items.length; i++) {
-            Array.insert(this.#object, i, items[i - index]);
-            this.#Dispatch("add", this.#object, i, items[i - index]);
+            const value = this.#ProcessValue(items[i - index]);
+            Array.insert(this.#object, i, value);
+            this.#Dispatch("add", this.#object, i, value);
         }
     }
 
@@ -119,18 +132,28 @@ export default class ObservableArray {
      * @returns {boolean}
      */
     #OnSet(object, key, value) {
-        const isAdded = !!object[key];
+        const isAdded = !(key in object);
 
-        if (value instanceof Array)
-            {}
-        else if (value instanceof Object)
-            value = new ObservableObject(value);
+        value = this.#ProcessValue(value);
         object[key] = value;
 
         if (isAdded)
             this.#Dispatch("add", object, key, value);
-        this.#Dispatch("set", object, key, value);
+        else
+            this.#Dispatch("set", object, key, value);
 
         return true;
+    }
+
+    /**
+     * @param {any} value
+     * @returns {any}
+     */
+    #ProcessValue(value) {
+        if (value instanceof Array)
+            value = new ObservableArray(value);
+        else if (value instanceof Object)
+            value = new ObservableObject(value);
+        return value;
     }
 }

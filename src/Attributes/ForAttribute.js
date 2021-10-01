@@ -1,5 +1,4 @@
 import { IndexOutOfRangeException } from "../Exceptions.js";
-import GlobalObserverHandler from "../GlobalObserverHandler.js";
 import VirtualNode from "../VirtualNode.js";
 import AttributesInitializer from "./AttributesInitializer.js";
 import ComponentAttribute from "./ComponentAttribute.js";
@@ -9,7 +8,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
     /** @type {string} */ #targetName
     /** @type {?number} */ #targetValue = null;
     /** @type {ForType} */ #type
-    /** @type {string} */ #source
+    /** @type {string} */ #sourceName
     /** @type {VirtualNode[]} */ #dynamicElements = [];
     
     get DynamicElements() {
@@ -31,33 +30,42 @@ export default class ForAttribute extends VirtualNodeAttribute {
         else if (forAttribute.includes(' in ') || forAttribute.includes(' of '))
             this.#ParseEachCycle(forAttribute);
 
-        eval(`
-            if ('On' in ${this.#source} && 'Off' in ${this.#source})
-            {
-                ${this.#source}.On("add", e => {
-                    let innerIdx = 0;
-                    for (let el in e.object)
-                    {
-                        if (e.key == el)
-                            break;
-                        innerIdx++;
-                    }
-                    this.#CreateElement(innerIdx, this.#targetName, e.value);
-                });
-                ${this.#source}.On("remove", e => {
-                    let innerIdx = 0;
-                    for (let el in e.object)
-                    {
-                        if (e.key == el)
-                            break;
-                        innerIdx++;
-                    }
-                    this.#RemoveElement(innerIdx);
-                });
+        if (this.#type != ForType.Cycle) {
+            const source = this.#GetSource();
+            if (source.IObservable) {
+                source.On("set", this.#EventHandler.bind(this));
+                source.On("add", this.#EventHandler.bind(this));
+                source.On("remove", this.#EventHandler.bind(this));
             }
-        `);
+        }
 
         this.Update();
+    }
+
+    /**
+     * @param {import("../FrameworkEventTarget.js").ChangedEventArgs} e
+     */
+    #EventHandler(e) {
+        let innerIdx = 0;
+        for (let el in e.object)
+        {
+            if (e.key == el)
+                break;
+            innerIdx++;
+        }
+        const value = this.#type == ForType.In ? e.key : e.value;
+        switch (e.type) {
+            case "set":
+                this.#RemoveElement(innerIdx);
+                this.#CreateElement(innerIdx, this.#targetName, value);
+                break;
+            case "add":
+                this.#CreateElement(innerIdx, this.#targetName, value);
+                break;
+            case "remove":
+                this.#RemoveElement(innerIdx);
+                break;
+        }
     }
 
     /**
@@ -79,7 +87,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
             this.#targetValue = Number(initializer.substr(equalsPos + 1));
         }
         this.#targetName = initializer.substring(targetStartPos, targetEndPos).trim();
-        this.#source = forAttribute.substr(forAttribute.indexOf(';') + 1).trim();
+        this.#sourceName = forAttribute.substr(forAttribute.indexOf(';') + 1).trim();
     }
 
     /**
@@ -98,15 +106,17 @@ export default class ForAttribute extends VirtualNodeAttribute {
             this.#type = ForType.Of;
         }
         this.#targetName = forAttribute.substring(startPos, wordPos).trim();
-        this.#source = forAttribute.substr(wordPos + 4).trim();
+        this.#sourceName = forAttribute.substr(wordPos + 4).trim();
     }
 
     Update() {
+        const source = this.#GetSource();
+        this.#ClearElements();
         eval(`
-            this.#ClearElements();
-
-            for (${this.#GetForFunction()})
-                this.#CreateElement(this.#dynamicElements.length, "${this.#targetName}", ${this.#targetName});
+            for (${this.#GetForFunction("source")}) {
+                const index = this.#dynamicElements.length;
+                this.#CreateElement(index, "${this.#targetName}", ${this.#targetName});
+            }
         `);
     }
 
@@ -155,9 +165,17 @@ export default class ForAttribute extends VirtualNodeAttribute {
     }
 
     /**
+     * @returns {any}
+     */
+    #GetSource() {
+        return (function(source) { return eval(source); }).call(this.Element.Context, this.#sourceName);
+    }
+
+    /**
+     * @param {string} sourceName
      * @returns {string}
      */
-    #GetForFunction() {
+    #GetForFunction(sourceName) {
         let result = "let " + this.#targetName;
         if (this.#type == ForType.Cycle) {
             if (this.#targetValue == null)
@@ -175,7 +193,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
             result += " in ";
         if (this.#type == ForType.Of)
             result += " of ";
-        result += this.#source;
+        result += sourceName;
         return result;
     }
 }

@@ -1,9 +1,14 @@
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
+import ObservableArray from "./ObservableArray.js";
 
 export default class ObservableObject extends ExtendableProxy {
     /** @type {FrameworkEventTarget} */ #eventTarget = new FrameworkEventTarget();
+
+    get IObservable() {
+        return true;
+    }
 
     /**
      * @param {Object} object
@@ -60,17 +65,18 @@ export default class ObservableObject extends ExtendableProxy {
      * @returns {boolean}
      */
     #OnSet(object, key, value) {
-        const isAdded = !!object[key];
+        const isAdded = !(key in object);
 
         if (value instanceof Array)
-            {}
+            value = new ObservableArray(value);
         else if (value instanceof Object)
             value = new ObservableObject(value);
         object[key] = value;
 
         if (isAdded)
             this.#Dispatch("add", object, key, value);
-        this.#Dispatch("set", object, key, value);
+        else
+            this.#Dispatch("set", object, key, value);
 
         return true;
     }

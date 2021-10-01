@@ -292,7 +292,7 @@ export default class VirtualNode {
             else
                 element.nodeValue = this.#value;
             for (let name in this.#htmlAttributes) {
-                if (!this.#IsEventTag(name)) {
+                if (this.#IsAvailableAttribute(name)) {
                     element.setAttribute(name, this.#htmlAttributes[name]);
                 }
             }
@@ -314,7 +314,7 @@ export default class VirtualNode {
     /**
      * @param {string} attributeName 
      */
-    #IsEventTag(attributeName) {
-        return attributeName.length > 1 && attributeName[0] == '@';
+    #IsAvailableAttribute(attributeName) {
+        return attributeName.length == 0 || (attributeName[0] != '@' && attributeName[0] != ':');
     }
 }
