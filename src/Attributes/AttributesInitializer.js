@@ -3,12 +3,14 @@ import VirtualNode from "../VirtualNode.js";
 import ForAttribute from "./ForAttribute.js";
 import ComponentAttribute from "./ComponentAttribute.js";
 import EventAttribute from "./EventAttribute.js";
+import PropsAttribute from "./PropsAttribute.js";
 
 export default class AttributesInitializer {
     /**
      * @param {VirtualNode} virtualNode 
      */
     static InitAttributes(virtualNode) {
+        this.TryInitPropsAttribute(virtualNode);
         this.TryInitEventAttribute(virtualNode);
         if (this.TryInitComponentAttribute(virtualNode))
             return;
@@ -29,6 +31,30 @@ export default class AttributesInitializer {
      * @param {VirtualNode} virtualNode 
      * @returns {boolean}
      */
+    static TryInitPropsAttribute(virtualNode)
+    {
+        if (this.#TestPropsAttributes(virtualNode.HtmlAttributes)) {
+            new PropsAttribute(virtualNode);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param {Object<string,string>} attributes
+     * @returns {boolean}
+     */
+    static #TestPropsAttributes(attributes) {
+        for (let name in attributes)
+            if (name.length > 1 && name[0] == ':')
+                return true;
+        return false;
+    }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
     static TryInitEventAttribute(virtualNode)
     {
         if (this.#TestEventAttributes(virtualNode.HtmlAttributes)) {
@@ -42,7 +68,7 @@ export default class AttributesInitializer {
      * @param {Object<string,string>} attributes
      * @returns {boolean}
      */
-     static #TestEventAttributes(attributes) {
+    static #TestEventAttributes(attributes) {
         for (let name in attributes)
             if (name.length > 1 && name[0] == '@')
                 return true;

@@ -7,16 +7,10 @@
     <script type="module" src="../src/Framework.js"></script>
     <script>
         window.addEventListener("FrameworkInitialization", () => {
-            window.arrays = new ObservableArray([]);
-            window.arrays.Push([1, 2, 3], {4: 12, 5: 23, 6: 34});
         });
     </script>
     <title>Document</title>
 </head>
 <body>
-    <div for="array of arrays">
-        {{this.array}}
-        <div for="item in this.array">{{this.item}}: {{this.array[this.item]}}</div>
-    </div>
 </body>
 </html>

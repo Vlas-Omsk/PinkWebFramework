@@ -1,4 +1,5 @@
 import VirtualNode from "../VirtualNode.js";
+import VirtualNodeContext from "../VirtualNodeContext.js";
 import AttributesInitializer from "./AttributesInitializer.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
@@ -56,8 +57,11 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         }
     }
 
+    /**
+     * @param {VirtualNodeContext} context 
+     */
     EvalScript(context) {
-        (function(script) { eval(script); }).call(context, this.#script);
+        context.EvalScript(this.#script);
     }
 
     /**

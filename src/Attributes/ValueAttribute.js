@@ -50,12 +50,12 @@ export default class ValueAttribute extends VirtualNodeAttribute {
      * @returns {string}
      */
     #Eval(value) {
-        return value.replaceAll(testRegexGlobal, function(_, e) {
+        return value.replaceAll(testRegexGlobal, (_, e) => {
             try {
-                return eval(e);
+                return this.Element.Context.EvalScript(e);
             } catch(ex) {
                 return ex;
             }
-        }.bind(this.Element.Context));
+        });
     }
 }

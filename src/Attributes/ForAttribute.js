@@ -168,7 +168,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
      * @returns {any}
      */
     #GetSource() {
-        return (function(source) { return eval(source); }).call(this.Element.Context, this.#sourceName);
+        return this.Element.Context.EvalScript(this.#sourceName);
     }
 
     /**
