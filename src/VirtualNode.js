@@ -16,6 +16,8 @@ export default class VirtualNode {
     /** @type {string} */ #value
     /** @type {Object<string,string>} */ #htmlAttributes = {}
     /** @type {string} */ #html
+    /** @type {Object<string,VirtualNode>} */ #slots = {}
+    /** @type {?string} */ #slotName = null
     /** @type {boolean} */ #isTemplate = false
     /** @type {boolean} */ #isDynamic = false
     /** @type {boolean} */ #isComponent = false
@@ -72,6 +74,14 @@ export default class VirtualNode {
     set Html(value) {
         this.#html = value;
         this.UpdateHtml();
+    }
+
+    get Slots() {
+        return this.#slots;
+    }
+
+    get SlotName() {
+        return this.#slotName;
     }
 
     get IsTemplate() {
@@ -160,13 +170,13 @@ export default class VirtualNode {
     }
 
     /**
-     * @param {VirtualNode} templatedParent 
+     * @param {string} slotName 
+     * @returns 
      */
-    MakeDynamic(templatedParent) {
-        if (this.#isDynamic)
+    MakeSlot(slotName) {
+        if (this.#slotName)
             return;
-        this.#templatedParent = templatedParent;
-        this.#isDynamic = true;
+        this.#slotName = slotName;
     }
 
     MakeTemplate() {
@@ -176,10 +186,56 @@ export default class VirtualNode {
         this.UpdateHtml();
     }
 
+    /**
+     * @param {VirtualNode} templatedParent 
+     */
+    MakeDynamic(templatedParent) {
+        if (this.#isDynamic)
+            return;
+        this.#templatedParent = templatedParent;
+        this.#isDynamic = true;
+    }
+
     MakeComponent() {
         if (this.#isComponent)
             return;
         this.#isComponent = true;
+    }
+
+
+
+    /** 
+     * @param {?(element: VirtualNode) => boolean} predicate
+     * @param {boolean} deep
+     * @returns {VirtualNode[]}
+     */
+    SelectNodes(predicate, deep = true) {
+        const elements = [];
+        for (let element of this.Elements) {
+            if (!predicate || predicate(element))
+                elements.push(element);
+            if (deep)
+                elements.push(...element.SelectNodes(predicate));
+        }
+        return elements;
+    }
+
+    /**
+     * @param {number} index
+     * @param {VirtualNode} virtualNode
+     */
+    ReplaceNode(index, virtualNode) {
+        if (index < 0 || index >= this.Elements.length)
+            throw new IndexOutOfRangeException("index");
+
+        const element = virtualNode.#CreateHtml(true);
+        if (element) {
+            this.Elements[index].#htmlElement.after(element);
+            this.Elements[index].#htmlElement.remove();
+        }
+        virtualNode.#parent = this;
+        virtualNode.#htmlElement = element;
+        this.Elements[index] = virtualNode;
     }
 
     /**
@@ -188,7 +244,7 @@ export default class VirtualNode {
      */
     InsertNode(index, virtualNode) {
         if (index < 0 || index >= this.Elements.length)
-            throw IndexOutOfRangeException("index");
+            throw new IndexOutOfRangeException("index");
 
         const element = virtualNode.#CreateHtml(true);
         if (element)
@@ -203,7 +259,7 @@ export default class VirtualNode {
      */
     RemoveNode(index) {
         if (index < 0 || index >= this.Elements.length)
-            throw IndexOutOfRangeException("index");
+            throw new IndexOutOfRangeException("index");
         
         const element = this.Elements[index];
         if (element.HtmlElement)
@@ -286,6 +342,7 @@ export default class VirtualNode {
         element.#tag = this.#tag;
         element.#value = this.#value;
         element.#htmlAttributes = Object.assign({}, this.#htmlAttributes);
+        element.#slotName = this.#slotName;
         element.#isComponent = this.#isComponent;
         return element;
     }

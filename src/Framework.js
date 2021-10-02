@@ -88,6 +88,9 @@ class Framework {
         this.#virtualBody = new VirtualNode(document.body);
         AttributesInitializer.InitAttributes(this.#virtualBody);
 
+        console.log("FrameworkSyncTasksCompleated");
+        window.dispatchEvent(new CustomEvent("FrameworkSyncTasksCompleated", {}));
+
         if (this.#asyncTasks.length == 0)
             this.#OnInitialized();
         else
