@@ -4,6 +4,7 @@ import ForAttribute from "./ForAttribute.js";
 import ComponentAttribute from "./ComponentAttribute.js";
 import EventAttribute from "./EventAttribute.js";
 import BindAttribute from "./BindAttribute.js";
+import RefAttribute from "./RefAttribute.js";
 
 export default class AttributesInitializer {
     /**
@@ -15,7 +16,8 @@ export default class AttributesInitializer {
         if (this.TryInitForAttribute(virtualNode))
             return;
         if (!virtualNode.IsTemplate) {
-            this.TryInitPropsAttribute(virtualNode);
+            this.TryInitRefAttribute(virtualNode);
+            this.TryInitBindAttribute(virtualNode);
             this.TryInitEventAttribute(virtualNode);
             this.TryInitValueAttribute(virtualNode);
             for (let i = 0; i < virtualNode.Elements.length; i++) {
@@ -31,9 +33,33 @@ export default class AttributesInitializer {
      * @param {VirtualNode} virtualNode 
      * @returns {boolean}
      */
-    static TryInitPropsAttribute(virtualNode)
+     static TryInitRefAttribute(virtualNode)
+     {
+         if (this.#TestRefAttributes(virtualNode.HtmlAttributes)) {
+             new RefAttribute(virtualNode);
+             return true;
+         }
+         return false;
+     }
+ 
+     /**
+      * @param {Object<string,string>} attributes
+      * @returns {boolean}
+      */
+     static #TestRefAttributes(attributes) {
+         for (let name in attributes)
+             if (name == "ref")
+                 return true;
+         return false;
+     }
+    
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static TryInitBindAttribute(virtualNode)
     {
-        if (this.#TestPropsAttributes(virtualNode.HtmlAttributes)) {
+        if (this.#TestBindAttributes(virtualNode.HtmlAttributes)) {
             new BindAttribute(virtualNode);
             return true;
         }
@@ -44,7 +70,7 @@ export default class AttributesInitializer {
      * @param {Object<string,string>} attributes
      * @returns {boolean}
      */
-    static #TestPropsAttributes(attributes) {
+    static #TestBindAttributes(attributes) {
         for (let name in attributes)
             if (name.length > 1 && name[0] == ':')
                 return true;

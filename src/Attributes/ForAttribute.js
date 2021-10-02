@@ -121,19 +121,6 @@ export default class ForAttribute extends VirtualNodeAttribute {
     }
 
     /**
-     * @param {VirtualNode} rootElement 
-     * @param {VirtualNode} currentElement 
-     */
-    #RecursiveSetSlots(rootElement, currentElement) {
-        for (let element of currentElement.Elements) {
-            if (element.SlotName)
-                rootElement.Slots[element.SlotName] = element;
-            else if (!element.IsComponent)
-                this.#RecursiveSetSlots(rootElement, element);
-        }
-    }
-
-    /**
      * @param {string} name 
      * @param {any} value 
      */
@@ -141,10 +128,8 @@ export default class ForAttribute extends VirtualNodeAttribute {
         const element = this.Element.Clone();
         element.Context[name] = value;
         this.#InsertElement(index, element);
-        if (element.IsComponent) {
-            this.#RecursiveSetSlots(element, element);
+        if (element.IsComponent)
             this.Element.TemplatedParent.GetAttribute(ComponentAttribute).EvalScript(element.Context);
-        }
         AttributesInitializer.InitAttributes(element);
     }
 

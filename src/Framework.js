@@ -104,8 +104,11 @@ class Framework {
     }
 }
 
+String.isEmpty = function(self) {
+    return (self.length === 0 || !self.trim());
+}
 String.isNullOrEmpty = function(self) {
-    return (!self || self.length === 0 || !self.trim());
+    return (!self || String.isEmpty(self));
 }
 Array.insert = function(self, index, item) {
     Array.prototype.splice.call(self, index, 0, item)

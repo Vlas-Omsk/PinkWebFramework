@@ -73,6 +73,8 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         const element = new VirtualNode(componentElement);
         element.MakeDynamic(this.Element);
         element.MakeComponent();
+        element.RefName = this.Element.RefName;
+        element.SlotName = this.Element.SlotName;
         this.#InsertSlots(element);
         for (let attributeName in this.Element.HtmlAttributes)
             element.SetHtmlAttribute(attributeName, this.Element.HtmlAttributes[attributeName]);
@@ -85,8 +87,8 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
      * @param {VirtualNode} virtualNode 
      */
     #InsertSlots(virtualNode) {
-        const templateSlots = virtualNode.SelectNodes(element => element.Tag == "slot");
-        const slots = this.Element.SelectNodes(element => element.Tag == "slot", false);
+        const templateSlots = virtualNode.FilterNodes(element => element.Tag == "slot");
+        const slots = this.Element.FilterNodes(element => element.Tag == "slot", false);
         let haveDefaultSlot = false;
         for (let templateSlot of templateSlots) {
             const templateSlotIdx = templateSlot.Parent.Elements.indexOf(templateSlot);
@@ -98,7 +100,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
             if (!slotName)
                 slotName = "default";
             if (!slot) {
-                if (!templateSlot.HtmlAttributes["required"]) {
+                if (!String.isEmpty(templateSlot.HtmlAttributes["required"])) {
                     templateSlot.Parent.RemoveNode(templateSlotIdx);
                     continue;
                 } else {

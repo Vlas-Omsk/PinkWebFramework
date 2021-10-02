@@ -16,8 +16,8 @@ export default class VirtualNode {
     /** @type {string} */ #value
     /** @type {Object<string,string>} */ #htmlAttributes = {}
     /** @type {string} */ #html
-    /** @type {Object<string,VirtualNode>} */ #slots = {}
     /** @type {?string} */ #slotName = null
+    /** @type {?string} */ #refName = null
     /** @type {boolean} */ #isTemplate = false
     /** @type {boolean} */ #isDynamic = false
     /** @type {boolean} */ #isComponent = false
@@ -76,12 +76,18 @@ export default class VirtualNode {
         this.UpdateHtml();
     }
 
-    get Slots() {
-        return this.#slots;
-    }
-
     get SlotName() {
         return this.#slotName;
+    }
+    set SlotName(value) {
+        this.#slotName = value;
+    }
+
+    get RefName() {
+        return this.#refName;
+    }
+    set RefName(value) {
+        this.#refName = value;
     }
 
     get IsTemplate() {
@@ -106,15 +112,16 @@ export default class VirtualNode {
         this.#SetProperty(htmlElement);
         this.#context = new VirtualNodeContext(this);
         this.#htmlElement = htmlElement;
-        if (htmlElement.attributes)
-            Array.prototype.forEach.call(
-                htmlElement.attributes,
-                attribute => {
-                    this.#htmlAttributes[attribute.name] = attribute.value;
-                    if (!this.#IsAvailableAttribute(attribute.name))
-                        htmlElement.removeAttribute(attribute.name);
+        if (htmlElement.attributes) {
+            for (let i = 0; i < htmlElement.attributes.length; i++) {
+                let attribute = htmlElement.attributes[i];
+                this.#htmlAttributes[attribute.name] = attribute.value;
+                if (!this.#IsAvailableAttribute(attribute.name)) {
+                    htmlElement.removeAttribute(attribute.name);
+                    i--;
                 }
-            );
+            }
+        }
         if (htmlElement.outerHTML)
             this.#tag = htmlElement.outerHTML
                 .substr(htmlElement.outerHTML
@@ -202,20 +209,57 @@ export default class VirtualNode {
         this.#isComponent = true;
     }
 
+    /**
+     * @param {string} slotName 
+     */
+    GetSlot(slotName) {
+        return this.FindNode(element => element.SlotName == slotName);
+    }
 
+    /**
+     * @param {string} refName 
+     */
+    GetRefs(refName) {
+        const elements = [];
+        for (let element of this.Elements) {
+            if (element.RefName == refName)
+                elements.push(element);
+            if (!element.IsComponent)
+                elements.push(...element.GetRefs(refName));
+        }
+        return elements;
+    }
+
+    /** 
+     * @param {(element: VirtualNode) => boolean} predicate
+     * @param {boolean} deep
+     * @returns {VirtualNode}
+     */
+    FindNode(predicate, deep = true) {
+        for (let element of this.Elements) {
+            if (predicate(element))
+                return element;
+            if (deep && !element.IsComponent) {
+                const node = element.FindNode(predicate);
+                if (node)
+                    return node;
+            }
+        }
+        return null;
+    }
 
     /** 
      * @param {?(element: VirtualNode) => boolean} predicate
      * @param {boolean} deep
      * @returns {VirtualNode[]}
      */
-    SelectNodes(predicate, deep = true) {
+    FilterNodes(predicate, deep = true) {
         const elements = [];
         for (let element of this.Elements) {
             if (!predicate || predicate(element))
                 elements.push(element);
             if (deep)
-                elements.push(...element.SelectNodes(predicate));
+                elements.push(...element.FilterNodes(predicate));
         }
         return elements;
     }
@@ -343,6 +387,7 @@ export default class VirtualNode {
         element.#value = this.#value;
         element.#htmlAttributes = Object.assign({}, this.#htmlAttributes);
         element.#slotName = this.#slotName;
+        element.#refName = this.#refName;
         element.#isComponent = this.#isComponent;
         return element;
     }
