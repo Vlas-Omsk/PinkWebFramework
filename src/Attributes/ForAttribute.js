@@ -1,4 +1,5 @@
 import { IndexOutOfRangeException } from "../Exceptions.js";
+import ValueChangedEventArgs from "../ValueChangedEventArgs.js";
 import VirtualNode from "../VirtualNode.js";
 import AttributesInitializer from "./AttributesInitializer.js";
 import ComponentAttribute from "./ComponentAttribute.js";
@@ -43,18 +44,18 @@ export default class ForAttribute extends VirtualNodeAttribute {
     }
 
     /**
-     * @param {import("../FrameworkEventTarget.js").ChangedEventArgs} e
+     * @param {ValueChangedEventArgs} e
      */
     #EventHandler(e) {
         let innerIdx = 0;
-        for (let el in e.object)
+        for (let el in e.Object)
         {
-            if (e.key == el)
+            if (e.Key == el)
                 break;
             innerIdx++;
         }
-        const value = this.#type == ForType.In ? e.key : e.value;
-        switch (e.type) {
+        const value = this.#type == ForType.In ? e.Key : e.Value;
+        switch (e.Type) {
             case "set":
                 this.#RemoveElement(innerIdx);
                 this.#CreateElement(innerIdx, this.#targetName, value);

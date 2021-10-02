@@ -17,7 +17,7 @@ export default class EventAttribute extends VirtualNodeAttribute {
             if (attributeName.length > 1 && attributeName[0] == '@')
             {
                 const eventName = attributeName.slice(1);
-                this.Element.HtmlElement.addEventListener(eventName, (e) => (function(script) {
+                this.Element.On(eventName, e => (function(script) {
                     const result = eval(script, e);
                     if (result instanceof Function)
                         result(e);

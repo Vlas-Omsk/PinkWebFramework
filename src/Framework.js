@@ -18,24 +18,32 @@ window.VirtualNodeAttribute = VirtualNodeAttribute;
 // ./
 import * as Exceptions from "./Exceptions.js";
 import ExtendableProxy from "./ExtendableProxy.js";
+import FrameworkEventArgs from "./FrameworkEventArgs.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
+import GlobalValueChangedEventArgs from "./GlobalValueChangedEventArgs.js";
 import ObservableArray from "./ObservableArray.js";
 import ObservableObject from "./ObservableObject.js";
+import ValueChangedEventArgs from "./ValueChangedEventArgs.js";
 import VirtualNode from "./VirtualNode.js";
 import VirtualNodeContext from "./VirtualNodeContext.js";
+import VirtualNodeEventArgs from "./VirtualNodeEventArgs.js";
 
 window.IndexOutOfRangeException = Exceptions.IndexOutOfRangeException;
 window.NotImplementedException = Exceptions.NotImplementedException;
 window.ComponentRequiresSrcAttribute = Exceptions.ComponentRequiresSrcAttribute;
 window.ComponentCanOnlyContainOneElement = Exceptions.ComponentCanOnlyContainOneElement;
 window.ExtendableProxy = ExtendableProxy;
+window.FrameworkEventArgs = FrameworkEventArgs;
 window.FrameworkEventTarget = FrameworkEventTarget;
 window.GlobalObserverHandler = GlobalObserverHandler;
+window.GlobalValueChangedEventArgs = GlobalValueChangedEventArgs;
 window.ObservableArray = ObservableArray;
 window.ObservableObject = ObservableObject;
+window.ValueChangedEventArgs = ValueChangedEventArgs;
 window.VirtualNode = VirtualNode;
 window.VirtualNodeContext = VirtualNodeContext;
+window.VirtualNodeEventArgs = VirtualNodeEventArgs;
 
 class Framework {
     /** @type {VirtualNode} */ #virtualBody

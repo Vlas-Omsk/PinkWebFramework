@@ -1,26 +1,27 @@
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
+import GlobalValueChangedEventArgs from "./GlobalValueChangedEventArgs.js";
 
 /**
  * @static
  */
 export default class GlobalObserverHandler {
-    /** @type {FrameworkEventTarget} */ static #eventTarget = new FrameworkEventTarget();
+    /** @type {FrameworkEventTarget<GlobalValueChangedEventArgs>} */ static #eventTarget = new FrameworkEventTarget();
 
     /**
      * @param {Function} func
-     * @returns {{target: FrameworkEventTarget, keys: (string | symbol)[]}}
+     * @returns {{target: FrameworkEventTarget<GlobalValueChangedEventArgs>, keys: (string | symbol)[]}}
      */
     static GetDependentObserver(func) {
         const observers = [];
         /**
-         * @param {import("./FrameworkEventTarget").ChangedEventArgs} e
+         * @param {GlobalValueChangedEventArgs} e
          */
         const callback = e => {
-            const idx = observers.indexOf(e.object);
+            const idx = observers.indexOf(e.DefaultEventTarget);
             if (idx == -1)
-                observers.push({target: e.object, test: e, keys: [e.key]});
+                observers.push({target: e.DefaultEventTarget, keys: [e.Key]});
             else
-                observers[idx].keys.push(e.key);
+                observers[idx].keys.push(e.Key);
         };
         this.#eventTarget.On("any", callback);
         func();
@@ -29,28 +30,25 @@ export default class GlobalObserverHandler {
     }
 
     /**
-     * @param {string} name
-     * @param {import("./FrameworkEventTarget").ChangedEventHandler} callback
+     * @param {string} type
+     * @param {import("./FrameworkEventTarget").EventHandler<GlobalValueChangedEventArgs>} callback
      */
-    static On(name, callback) {
-        this.#eventTarget.On(name, callback);
+    static On(type, callback) {
+        this.#eventTarget.On(type, callback);
     }
 
     /**
-     * @param {string} name
-     * @param {import("./FrameworkEventTarget").ChangedEventHandler} callback
+     * @param {string} type
+     * @param {import("./FrameworkEventTarget").EventHandler<GlobalValueChangedEventArgs>} callback
      */
-    static Off(name, callback) {
-        this.#eventTarget.Off(name, callback);
+    static Off(type, callback) {
+        this.#eventTarget.Off(type, callback);
     }
 
     /**
-     * @param {string} name
-     * @param {*} object
-     * @param {string | symbol} key
-     * @param {*} value
+     * @param {GlobalValueChangedEventArgs} eventArgs
      */
-    static Dispatch(name, object, key, value) {
-        this.#eventTarget.Dispatch(name, object, key, value);
+    static Dispatch(eventArgs) {
+        this.#eventTarget.Dispatch(eventArgs);
     }
 }

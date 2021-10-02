@@ -3,7 +3,7 @@ export default class ExtendableProxy {
      * @param {Object} parameters
      * @param {Object} parameters.target
      * @param {ProxyHandler<>} parameters.handler
-     * @param {object} prototype
+     * @param {Object} prototype
      */
     constructor(parameters, prototype) {
         if (prototype)

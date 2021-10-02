@@ -30,7 +30,7 @@ export default class ValueAttribute extends VirtualNodeAttribute {
         const observers = GlobalObserverHandler.GetDependentObserver(this.Update.bind(this));
         for (let observer of observers) {
             observer.target.On("set", e => {
-                if (observer.keys.indexOf(e.key) != -1)
+                if (observer.keys.indexOf(e.Key) != -1)
                     this.Update();
             });
         }

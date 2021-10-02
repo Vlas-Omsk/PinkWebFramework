@@ -1,6 +1,8 @@
 import VirtualNodeAttribute from "./Attributes/VirtualNodeAttribute.js";
 import { IndexOutOfRangeException } from "./Exceptions.js";
+import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import VirtualNodeContext from "./VirtualNodeContext.js";
+import VirtualNodeEventArgs from "./VirtualNodeEventArgs.js";
 
 export default class VirtualNode {
     /** @type {VirtualNode[]} */ Elements = []
@@ -17,7 +19,8 @@ export default class VirtualNode {
     /** @type {boolean} */ #isTemplate = false
     /** @type {boolean} */ #isDynamic = false
     /** @type {boolean} */ #isComponent = false
-    /** @type {EventTarget} */ #eventTarget = new EventTarget()
+    /** @type {FrameworkEventTarget<VirtualNodeEventArgs>} */ #eventTarget = new FrameworkEventTarget()
+    /** @type {string[]} */ #registeredEvents = []
 
     get HtmlElement() {
         return this.#htmlElement;
@@ -115,6 +118,7 @@ export default class VirtualNode {
             virtualNode.#parent = this;
             this.Elements.push(virtualNode);
         });
+        this.#Dispatch(null, "created");
     }
 
     /**
@@ -142,7 +146,7 @@ export default class VirtualNode {
         if (this.#htmlAttributes[name] == value)
             return;
         this.#htmlAttributes[name] = value;
-        if (this.#htmlElement.setAttribute)
+        if (this.#htmlElement.setAttribute && this.#IsAvailableAttribute(name))
             this.#htmlElement.setAttribute(name, value);
     }
 
@@ -221,31 +225,51 @@ export default class VirtualNode {
         if (this.#htmlElement)
             this.#htmlElement.remove();
         this.#htmlElement = element;
-        this.#eventTarget.dispatchEvent(new CustomEvent("updated"));
+        for (let type of this.#registeredEvents)
+            this.#htmlElement.addEventListener(type, e =>
+                this.#Dispatch(type, e));
+        this.#Dispatch(null, "updated");
     }
 
     /**
      * @param {string} type 
-     * @param {CustomEventInit<any>} eventInitDict 
+     * @param {any} data 
      */
-    Emit(type, eventInitDict) {
-        this.#htmlElement.dispatchEvent(new CustomEvent(type, eventInitDict));
+    Emit(type, data) {
+        this.#Dispatch(type, data);
+        if (!this.#isComponent && this.#parent)
+            this.#parent.Emit(type, data);
     }
 
     /**
      * @param {string} name
-     * @param {EventListenerOrEventListenerObject} callback
+     * @param {import("./FrameworkEventTarget").EventHandler<VirtualNodeEventArgs>} callback
      */
     On(name, callback) {
-        this.#eventTarget.addEventListener(name, callback);
+        const systemEventName = "on" + name;
+        if ((systemEventName in HTMLElement.prototype || systemEventName in Node.prototype) &&
+            this.#registeredEvents.indexOf(name) == -1) {
+            this.#registeredEvents.push(name);
+            this.#htmlElement.addEventListener(name, e =>
+                this.#Dispatch(name, e));
+        }
+        this.#eventTarget.On(name, callback);
     }
 
     /**
      * @param {string} name
-     * @param {EventListenerOrEventListenerObject} callback
+     * @param {import("./FrameworkEventTarget").EventHandler<VirtualNodeEventArgs>} callback
      */
     Off(name, callback) {
-        this.#eventTarget.removeEventListener(name, callback);
+        this.#eventTarget.Off(name, callback);
+    }
+
+    /**
+     * @param {string} type 
+     * @param {any} data 
+     */
+    #Dispatch(type, data) {
+        this.#eventTarget.Dispatch(new VirtualNodeEventArgs(data, type, this));
     }
 
     /**

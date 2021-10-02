@@ -1,7 +1,9 @@
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
+import GlobalValueChangedEventArgs from "./GlobalValueChangedEventArgs.js";
 import ObservableArray from "./ObservableArray.js";
+import ValueChangedEventArgs from "./ValueChangedEventArgs.js";
 
 export default class ObservableObject extends ExtendableProxy {
     /** @type {FrameworkEventTarget} */ #eventTarget = new FrameworkEventTarget();
@@ -21,30 +23,30 @@ export default class ObservableObject extends ExtendableProxy {
     }
 
     /**
-     * @param {string} name
-     * @param {import("./FrameworkEventTarget").ChangedEventHandler} callback
+     * @param {string} type
+     * @param {import("./FrameworkEventTarget").EventHandler<ValueChangedEventArgs>} callback
      */
-    On(name, callback) {
-        this.#eventTarget.On(name, callback);
+    On(type, callback) {
+        this.#eventTarget.On(type, callback);
     }
 
     /**
-     * @param {string} name
-     * @param {import("./FrameworkEventTarget").ChangedEventHandler} callback
+     * @param {string} type
+     * @param {import("./FrameworkEventTarget").EventHandler<ValueChangedEventArgs>} callback
      */
-    Off(name, callback) {
-        this.#eventTarget.Off(name, callback);
+    Off(type, callback) {
+        this.#eventTarget.Off(type, callback);
     }
 
     /**
-     * @param {string} name
+     * @param {string} type
      * @param {*} object
      * @param {string | symbol} key
      * @param {*} value
      */
-    #Dispatch(name, object, key, value) {
-        this.#eventTarget.Dispatch(name, object, key, value);
-        GlobalObserverHandler.Dispatch(name, this.#eventTarget, key, value);
+    #Dispatch(type, object, key, value) {
+        this.#eventTarget.Dispatch(new ValueChangedEventArgs(object, key, value, type, this));
+        GlobalObserverHandler.Dispatch(new GlobalValueChangedEventArgs(this.#eventTarget, object, key, value, type, this));
     }
 
     /**
@@ -54,7 +56,8 @@ export default class ObservableObject extends ExtendableProxy {
      */
     #OnGet(object, key) {
         const value = object[key];
-        this.#Dispatch("get", object, key, value);
+        if (!(key in ObservableObject.prototype))
+            this.#Dispatch("get", object, key, value);
         return value;
     }
 

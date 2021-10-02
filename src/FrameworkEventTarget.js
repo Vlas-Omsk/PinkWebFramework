@@ -1,55 +1,49 @@
+import FrameworkEventArgs from "./FrameworkEventArgs.js";
+
 /**
- * @typedef {Object} ChangedEventArgs
- * @property {string} type
- * @property {*} object
- * @property {string | symbol} key
- * @property {*} value
- * @property {FrameworkEventTarget} sender
+ * @template {FrameworkEventArgs} T
+ * @callback EventHandler
+ * @param {T} e
+ * @returns {void}
  */
 
 /**
- * @callback ChangedEventHandler
- * @param {ChangedEventArgs} e
+ * @template {FrameworkEventArgs} T
  */
-
 export default class FrameworkEventTarget {
-    /** @type {Object<string,ChangedEventHandler[]>} */ #dispatchHandlers = []
+    /** @type {Object<string, EventHandler[]>} */ #dispatchHandlers = []
 
     constructor() {
     }
 
     /**
-     * @param {string} name
-     * @param {ChangedEventHandler} callback
+     * @param {string} type
+     * @param {EventHandler<T>} callback
      */
-    On(name, callback) {
-        if (!this.#dispatchHandlers[name])
-            this.#dispatchHandlers[name] = [callback];
+    On(type, callback) {
+        if (!this.#dispatchHandlers[type])
+            this.#dispatchHandlers[type] = [callback];
         else
-            this.#dispatchHandlers[name].push(callback);
+            this.#dispatchHandlers[type].push(callback);
     }
 
     /**
-     * @param {string} name
-     * @param {ChangedEventHandler} callback
+     * @param {string} type
+     * @param {EventHandler<T>} callback
      */
-    Off(name, callback) {
-        if (this.#dispatchHandlers[name])
-            this.#dispatchHandlers[name] =
-                this.#dispatchHandlers[name] = this.#dispatchHandlers[name].filter(cb => cb != callback);
+    Off(type, callback) {
+        if (this.#dispatchHandlers[type])
+            this.#dispatchHandlers[type] =
+                this.#dispatchHandlers[type] = this.#dispatchHandlers[type].filter(cb => cb != callback);
     }
 
     /**
-     * @param {string} name
-     * @param {*} object
-     * @param {string | symbol} key
-     * @param {*} value
+     * @param {T} eventArgs
      */
-    Dispatch(name, object, key, value) {
-        const event = { type: name, object, key, value, sender: this };
-        if (this.#dispatchHandlers[name])
-            this.#dispatchHandlers[name].forEach(callback => callback(event));
+    Dispatch(eventArgs) {
+        if (this.#dispatchHandlers[eventArgs.Type])
+            this.#dispatchHandlers[eventArgs.Type].forEach(callback => callback(eventArgs));
         if (this.#dispatchHandlers["any"])
-            this.#dispatchHandlers["any"].forEach(callback => callback(event));
+            this.#dispatchHandlers["any"].forEach(callback => callback(eventArgs));
     }
 }

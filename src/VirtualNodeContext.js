@@ -1,7 +1,8 @@
-import BindAttribute from "./Attributes/BindAttribute.js";
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
+import GlobalValueChangedEventArgs from "./GlobalValueChangedEventArgs.js";
+import ValueChangedEventArgs from "./ValueChangedEventArgs.js";
 import VirtualNode from "./VirtualNode.js";
 
 /**
@@ -80,19 +81,19 @@ export default class VirtualNodeContext extends ExtendableProxy {
     }
 
     /**
-     * @param {string} name
-     * @param {import("./FrameworkEventTarget").ChangedEventHandler} callback
+     * @param {string} type
+     * @param {import("./FrameworkEventTarget").EventHandler<ValueChangedEventArgs>} callback
      */
-    On(name, callback) {
-        this.#eventTarget.On(name, callback);
+    On(type, callback) {
+        this.#eventTarget.On(type, callback);
     }
 
     /**
-     * @param {string} name
-     * @param {import("./FrameworkEventTarget").ChangedEventHandler} callback
+     * @param {string} type
+     * @param {import("./FrameworkEventTarget").EventHandler<ValueChangedEventArgs>} callback
      */
-    Off(name, callback) {
-        this.#eventTarget.Off(name, callback);
+    Off(type, callback) {
+        this.#eventTarget.Off(type, callback);
     }
 
     /**
@@ -102,8 +103,8 @@ export default class VirtualNodeContext extends ExtendableProxy {
      * @param {*} value
      */
     #Dispatch(name, object, key, value) {
-        this.#eventTarget.Dispatch(name, object, key, value);
-        GlobalObserverHandler.Dispatch(name, this.#eventTarget, key, value);
+        this.#eventTarget.Dispatch(new ValueChangedEventArgs(object, key, value, name, this));
+        GlobalObserverHandler.Dispatch(new GlobalValueChangedEventArgs(this.#eventTarget, object, key, value, name, this));
     }
 
     /**
@@ -127,10 +128,19 @@ export default class VirtualNodeContext extends ExtendableProxy {
                 this.#Dispatch("get", object, key, value);
             return value;
         }
-        if (key.length > 1 && key[0] == '$') {
-            const nodeKey = key[1].toUpperCase() + key.slice(2);
-            if (nodeKey in this.#virtualNode)
-                return this.#virtualNode[nodeKey];
+        if (key.length > 0 && key[0] == '$') {
+            if (key.length == 1) {
+                return this.#virtualNode;
+            } else {
+                const nodeKey = key[1].toUpperCase() + key.slice(2);
+                if (nodeKey in this.#virtualNode) {
+                    const value = this.#virtualNode[nodeKey];
+                    if (value instanceof Function)
+                        return value.bind(this.#virtualNode);
+                    else
+                        return value;
+                }
+            }
         }
         if (!this.#virtualNode.IsComponent && this.#virtualNode.Parent)
             return this.#virtualNode.Parent.Context[key];
