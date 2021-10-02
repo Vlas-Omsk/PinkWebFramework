@@ -30,6 +30,8 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
     }
 
     async Update() {
+        window.Framework.AsyncTaskBegin(this);
+
         const childrens = (await this.#TryGetHtmlContent()).children;
 
         for (let children of childrens)
@@ -56,6 +58,8 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                 document.head.appendChild(children);
             }
         }
+
+        window.Framework.AsyncTaskEnd(this);
     }
 
     /**

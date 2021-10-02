@@ -46,10 +46,41 @@ window.VirtualNodeContext = VirtualNodeContext;
 window.VirtualNodeEventArgs = VirtualNodeEventArgs;
 
 class Framework {
+    /** @type {Framework} */ static #instance = new Framework()
+
+    static get Instance() {
+        return this.#instance;
+    }
+
     /** @type {VirtualNode} */ #virtualBody
+    /** @type {object[]} */ #asyncTasks = []
 
     get VirtualBody() {
         return this.#virtualBody;
+    }
+
+    /**
+     * @private
+     */
+    constructor() {
+    }
+
+    /**
+     * @param {object} asyncTaskObject 
+     */
+    AsyncTaskBegin(asyncTaskObject) {
+        this.#asyncTasks.push(asyncTaskObject);
+    }
+
+    /**
+     * @param {object} asyncTaskObject 
+     */
+    AsyncTaskEnd(asyncTaskObject) {
+        this.#asyncTasks = this.#asyncTasks.filter(task => task != asyncTaskObject);
+        if (this.#asyncTasks.length == 0) {
+            console.log("FrameworkAsyncTasksCompleated");
+            window.dispatchEvent(new CustomEvent("FrameworkAsyncTasksCompleated", {}));
+        }
     }
 
     Create() {
@@ -57,6 +88,14 @@ class Framework {
         this.#virtualBody = new VirtualNode(document.body);
         AttributesInitializer.InitAttributes(this.#virtualBody);
 
+        if (this.#asyncTasks.length == 0)
+            this.#OnInitialized();
+        else
+            window.addEventListener("FrameworkAsyncTasksCompleated", this.#OnInitialized.bind(this));
+    }
+
+    #OnInitialized() {
+        window.removeEventListener("FrameworkAsyncTasksCompleated", this.#OnInitialized);
         console.log("FrameworkInitialized");
         window.dispatchEvent(new CustomEvent("FrameworkInitialized", {}));
     }
@@ -72,6 +111,5 @@ Array.removeAt = function(self, index) {
     Array.prototype.splice.call(self, index, 1)
 };
 
-const framework = new Framework();
-document.addEventListener("DOMContentLoaded", () => framework.Create());
-window.Framework = framework;
+document.addEventListener("DOMContentLoaded", () => Framework.Instance.Create());
+window.Framework = Framework.Instance;
