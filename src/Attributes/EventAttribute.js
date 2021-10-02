@@ -1,3 +1,4 @@
+import VirtualNode from "../VirtualNode.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
 export default class EventAttribute extends VirtualNodeAttribute {
@@ -6,7 +7,7 @@ export default class EventAttribute extends VirtualNodeAttribute {
      */
     constructor(virtualNode) {
         super(virtualNode);
-
+        
         this.Update();
         this.Element.On("updated", this.Update);
     }

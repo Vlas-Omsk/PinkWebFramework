@@ -44,7 +44,7 @@ export default class ObservableObject extends ExtendableProxy {
      */
     #Dispatch(name, object, key, value) {
         this.#eventTarget.Dispatch(name, object, key, value);
-        GlobalObserverHandler.Dispatch(name, object, key, value);
+        GlobalObserverHandler.Dispatch(name, this.#eventTarget, key, value);
     }
 
     /**

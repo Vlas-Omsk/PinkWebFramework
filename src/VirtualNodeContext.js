@@ -1,4 +1,4 @@
-import PropsAttribute from "./Attributes/PropsAttribute.js";
+import BindAttribute from "./Attributes/BindAttribute.js";
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalObserverHandler from "./GlobalObserverHandler.js";
@@ -103,7 +103,7 @@ export default class VirtualNodeContext extends ExtendableProxy {
      */
     #Dispatch(name, object, key, value) {
         this.#eventTarget.Dispatch(name, object, key, value);
-        GlobalObserverHandler.Dispatch(name, object, key, value);
+        GlobalObserverHandler.Dispatch(name, this.#eventTarget, key, value);
     }
 
     /**
@@ -123,7 +123,8 @@ export default class VirtualNodeContext extends ExtendableProxy {
         }
         if (key in object) {
             const value = object[key];
-            this.#Dispatch("get", object, key, value);
+            if (!(key in VirtualNodeContext.prototype))
+                this.#Dispatch("get", object, key, value);
             return value;
         }
         if (key.length > 1 && key[0] == '$') {

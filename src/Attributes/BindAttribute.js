@@ -1,6 +1,7 @@
+import { NotImplementedException } from "../Exceptions.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
-export default class PropsAttribute extends VirtualNodeAttribute {
+export default class BindAttribute extends VirtualNodeAttribute {
     /**
      * @param {VirtualNode} virtualNode
      */
@@ -32,7 +33,7 @@ export default class PropsAttribute extends VirtualNodeAttribute {
         if (e.key == targetFieldName)
         {
             e.handled = true;
-            return this.Element.Parent.Context[sourceFieldName];
+            return this.Element.Parent.Context.EvalScript(sourceFieldName);
         }
     }
 
@@ -44,6 +45,7 @@ export default class PropsAttribute extends VirtualNodeAttribute {
     #OnSet(e, targetFieldName, sourceFieldName) {
         if (e.key == targetFieldName)
         {
+            throw NotImplementedException();
             e.handled = true;
             this.Element.Parent.Context[sourceFieldName] = e.value;
         }

@@ -49,7 +49,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                 this.Element.Parent.InsertNode(templateIndex, this.#dynamicElement);
                 if (!AttributesInitializer.TryInitForAttribute(this.#dynamicElement))
                 {
-                    this.EvalScript(this.Element.Context);
+                    this.EvalScript(this.#dynamicElement.Context);
                     AttributesInitializer.InitAttributes(this.#dynamicElement);
                 }
             } else if (children.tagName == "STYLE") {

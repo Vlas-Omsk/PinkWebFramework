@@ -96,7 +96,11 @@ export default class VirtualNode {
         if (htmlElement.attributes)
             Array.prototype.forEach.call(
                 htmlElement.attributes,
-                attribute => this.#htmlAttributes[attribute.name] = attribute.value
+                attribute => {
+                    this.#htmlAttributes[attribute.name] = attribute.value;
+                    if (!this.#IsAvailableAttribute(attribute.name))
+                        htmlElement.removeAttribute(attribute.name);
+                }
             );
         if (htmlElement.outerHTML)
             this.#tag = htmlElement.outerHTML
@@ -207,7 +211,7 @@ export default class VirtualNode {
      * @returns {VirtualNode}
      */
     Clone() {
-        return this.#CloneInner(this.#parent);
+        return this.#CloneInner(null);
     }
 
     UpdateHtml() {

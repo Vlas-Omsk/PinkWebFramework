@@ -31,7 +31,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
             this.#ParseEachCycle(forAttribute);
 
         if (this.#type != ForType.Cycle) {
-            const source = this.#GetSource();
+            const source = this.Element.Context.EvalScript(this.#sourceName);
             if (source.IObservable) {
                 source.On("set", this.#EventHandler.bind(this));
                 source.On("add", this.#EventHandler.bind(this));
@@ -110,10 +110,9 @@ export default class ForAttribute extends VirtualNodeAttribute {
     }
 
     Update() {
-        const source = this.#GetSource();
         this.#ClearElements();
         eval(`
-            for (${this.#GetForFunction("source")}) {
+            for (${this.#GetForFunction()}) {
                 const index = this.#dynamicElements.length;
                 this.#CreateElement(index, "${this.#targetName}", ${this.#targetName});
             }
@@ -165,17 +164,9 @@ export default class ForAttribute extends VirtualNodeAttribute {
     }
 
     /**
-     * @returns {any}
-     */
-    #GetSource() {
-        return this.Element.Context.EvalScript(this.#sourceName);
-    }
-
-    /**
-     * @param {string} sourceName
      * @returns {string}
      */
-    #GetForFunction(sourceName) {
+    #GetForFunction() {
         let result = "let " + this.#targetName;
         if (this.#type == ForType.Cycle) {
             if (this.#targetValue == null)
@@ -193,7 +184,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
             result += " in ";
         if (this.#type == ForType.Of)
             result += " of ";
-        result += sourceName;
+        result += this.#sourceName;
         return result;
     }
 }

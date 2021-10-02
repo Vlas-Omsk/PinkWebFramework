@@ -3,20 +3,20 @@ import VirtualNode from "../VirtualNode.js";
 import ForAttribute from "./ForAttribute.js";
 import ComponentAttribute from "./ComponentAttribute.js";
 import EventAttribute from "./EventAttribute.js";
-import PropsAttribute from "./PropsAttribute.js";
+import BindAttribute from "./BindAttribute.js";
 
 export default class AttributesInitializer {
     /**
      * @param {VirtualNode} virtualNode 
      */
     static InitAttributes(virtualNode) {
-        this.TryInitPropsAttribute(virtualNode);
-        this.TryInitEventAttribute(virtualNode);
         if (this.TryInitComponentAttribute(virtualNode))
             return;
         if (this.TryInitForAttribute(virtualNode))
             return;
         if (!virtualNode.IsTemplate) {
+            this.TryInitPropsAttribute(virtualNode);
+            this.TryInitEventAttribute(virtualNode);
             this.TryInitValueAttribute(virtualNode);
             for (let i = 0; i < virtualNode.Elements.length; i++) {
                 const element = virtualNode.Elements[i];
@@ -34,7 +34,7 @@ export default class AttributesInitializer {
     static TryInitPropsAttribute(virtualNode)
     {
         if (this.#TestPropsAttributes(virtualNode.HtmlAttributes)) {
-            new PropsAttribute(virtualNode);
+            new BindAttribute(virtualNode);
             return true;
         }
         return false;

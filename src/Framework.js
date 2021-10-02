@@ -1,17 +1,17 @@
 // ./Attributes/
 import AttributesInitializer from "./Attributes/AttributesInitializer.js";
+import BindAttribute from "./Attributes/BindAttribute.js";
 import ComponentAttribute from "./Attributes/ComponentAttribute.js";
 import EventAttribute from "./Attributes/EventAttribute.js";
 import ForAttribute from "./Attributes/ForAttribute.js";
-import PropsAttribute from "./Attributes/PropsAttribute.js";
 import ValueAttribute from "./Attributes/ValueAttribute.js";
 import VirtualNodeAttribute from "./Attributes/VirtualNodeAttribute.js";
 
 window.AttributesInitializer = AttributesInitializer;
+window.BindAttribute = BindAttribute;
 window.ComponentAttribute = ComponentAttribute;
 window.EventAttribute = EventAttribute;
 window.ForAttribute = ForAttribute;
-window.PropsAttribute = PropsAttribute;
 window.ValueAttribute = ValueAttribute;
 window.VirtualNodeAttribute = VirtualNodeAttribute;
 
