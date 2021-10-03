@@ -21,6 +21,7 @@ export default class FrameworkEventTarget {
      * @param {EventHandler<T>} callback
      */
     On(type, callback) {
+        type = this.#PreProcessType(type);
         if (!this.#dispatchHandlers[type])
             this.#dispatchHandlers[type] = [callback];
         else
@@ -32,6 +33,7 @@ export default class FrameworkEventTarget {
      * @param {EventHandler<T>} callback
      */
     Off(type, callback) {
+        type = this.#PreProcessType(type);
         if (this.#dispatchHandlers[type])
             this.#dispatchHandlers[type] =
                 this.#dispatchHandlers[type] = this.#dispatchHandlers[type].filter(cb => cb != callback);
@@ -41,9 +43,18 @@ export default class FrameworkEventTarget {
      * @param {T} eventArgs
      */
     Dispatch(eventArgs) {
-        if (this.#dispatchHandlers[eventArgs.Type])
-            this.#dispatchHandlers[eventArgs.Type].forEach(callback => callback(eventArgs));
+        const type = this.#PreProcessType(eventArgs.Type);
+        if (this.#dispatchHandlers[type])
+            this.#dispatchHandlers[type].forEach(callback => callback(eventArgs));
         if (this.#dispatchHandlers["any"])
             this.#dispatchHandlers["any"].forEach(callback => callback(eventArgs));
+    }
+
+    /**
+     * @param {string} type 
+     * @returns {string}
+     */
+    #PreProcessType(type) {
+        return type.toLowerCase();
     }
 }

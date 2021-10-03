@@ -25,6 +25,24 @@ export default class ObservableArray extends ExtendableProxy {
         this.#object = parameters.target;
     }
 
+    Clear() {
+        while (this.#object.length > 0)
+            this.RemoveAt(0);
+    }
+
+    /**
+     * @param {number} from 
+     * @param {number} to 
+     */
+    Swap(from, to) {
+        const tempObj = this.#object[from];
+        this.#object[from] = this.#object[to];
+        this.#object[to] = tempObj;
+
+        this.#Dispatch("set", this.#object, from, this.#object[from]);
+        this.#Dispatch("set", this.#object, to, this.#object[to]);
+    }
+
     /**
      * @param {...any} items 
      */

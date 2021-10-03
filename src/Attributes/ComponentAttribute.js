@@ -47,7 +47,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                 this.#dynamicElement = this.#CreateElement(children.children[0]);
                 if (!AttributesInitializer.TryInitForAttribute(this.#dynamicElement))
                 {
-                    this.EvalScript(element.Context);
+                    this.EvalScript(element);
                     AttributesInitializer.InitAttributes(element);
                 }
             } else if (children.tagName == "STYLE") {
@@ -59,10 +59,14 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
     }
 
     /**
-     * @param {VirtualNodeContext} context 
+     * @param {VirtualNode} element 
      */
-    EvalScript(context) {
-        context.EvalScript(this.#script);
+    EvalScript(element) {
+        element.Context.EvalScript(this.#script);
+        for (let propName in element.Context)
+            if (/^on/i.test(propName))
+                element.On(propName.slice(2).toLocaleLowerCase(),
+                    () => element.Context[propName].call(element.Context));
     }
 
     /**

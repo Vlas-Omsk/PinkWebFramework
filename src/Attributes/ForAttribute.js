@@ -129,7 +129,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
         element.Context[name] = value;
         element.MakeDynamic(this.Element);
         if (element.IsComponent)
-            this.Element.TemplatedParent.GetAttribute(ComponentAttribute).EvalScript(element.Context);
+            this.Element.TemplatedParent.GetAttribute(ComponentAttribute).EvalScript(element);
         AttributesInitializer.InitAttributes(element);
         return element;
     }
@@ -164,7 +164,7 @@ export default class ForAttribute extends VirtualNodeAttribute {
             throw new IndexOutOfRangeException("index");
 
         const templateIndex = this.Element.Parent.Elements.indexOf(this.Element);
-        index += templateIndex;
+        index += templateIndex + 1;
         this.Element.Parent.ReplaceNode(index, virtualNode);
     }
 

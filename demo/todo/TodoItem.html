@@ -12,15 +12,15 @@
 <script>
     this.isChecked = false;
 
-    this.$on("created", e => {
+    this.OnCreated = () => {
         console.log("Created item: ", this.item);
-    });
-    this.$on("updated", e => {
+    }
+    this.OnUpdated = () => {
         console.log("Updated item: ", this.item);
-    });
-    this.$on("destroyed", e => {
+    }
+    this.OnDestroyed = () => {
         console.log("Removed item: ", this.item);
-    });
+    }
 </script>
 
 <style>
