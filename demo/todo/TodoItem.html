@@ -1,0 +1,52 @@
+<component>
+    <li class="item">
+        <input type="checkbox" ref="test" class="item__checkbox" @change="this.isChecked = !this.isChecked"/>
+        <div
+            class="item__text"
+            :class="{ 'item__text-checked': () => this.isChecked }"
+        >{{this.item}}</div>
+        <button class="item__close" @click="this.$emit('remove', this.item)">&times;</button>
+    </li>
+</component>
+
+<script>
+    this.isChecked = false;
+
+    this.$on("created", e => {
+        console.log("Created item: ", this.item);
+    });
+    this.$on("updated", e => {
+        console.log("Updated item: ", this.item);
+    });
+    this.$on("destroyed", e => {
+        console.log("Removed item: ", this.item);
+    });
+</script>
+
+<style>
+.item {
+    display: flex;
+    justify-content: space-between;
+    justify-items: center;
+    align-items: center;
+    list-style: none;
+    padding: 10px 0;
+    margin: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.item__checkbox {
+    margin: 0 20px;
+}
+.item__text-checked {
+    text-decoration: line-through;
+}
+.item__close {
+    margin: 0 20px;
+    width: 30px;
+    height: 30px;
+    background-color: red;
+    border-radius: 100%;
+    color: white;
+}
+</style>

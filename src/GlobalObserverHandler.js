@@ -1,5 +1,6 @@
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
 import GlobalValueChangedEventArgs from "./GlobalValueChangedEventArgs.js";
+import ValueChangedEventArgs from "./ValueChangedEventArgs.js";
 
 /**
  * @static
@@ -9,7 +10,7 @@ export default class GlobalObserverHandler {
 
     /**
      * @param {Function} func
-     * @returns {{target: FrameworkEventTarget<GlobalValueChangedEventArgs>, keys: (string | symbol)[]}}
+     * @returns {{target: FrameworkEventTarget<ValueChangedEventArgs>, keys: (string | symbol)[]}}
      */
     static GetDependentObserver(func) {
         const observers = [];

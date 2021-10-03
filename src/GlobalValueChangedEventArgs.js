@@ -1,14 +1,14 @@
 import ValueChangedEventArgs from "./ValueChangedEventArgs.js";
 
 export default class GlobalValueChangedEventArgs extends ValueChangedEventArgs {
-    /** @type {any} */ #defaultEventTarget
+    /** @type {ValueChangedEventArgs} */ #defaultEventTarget
 
     get DefaultEventTarget() {
         return this.#defaultEventTarget;
     }
 
     /**
-     * @param {any} defaultEventTarget
+     * @param {ValueChangedEventArgs} defaultEventTarget
      * @param {any} object 
      * @param {string | symbol} key 
      * @param {any} value 

@@ -48,3 +48,12 @@ export class SlotCanOnlyContainOneElement extends Error {
         super("SlotCanOnlyContainOneElement:\r\nA slot can only contain one element");
     }
 }
+
+export class BindingMustReturnDifferentType extends Error {
+    /**
+     * @param {string} typeName 
+     */
+    constructor(typeName) {
+        super("BindingMustReturnDifferentType:\r\nThe binding must return a '" + typeName + "' type");
+    }
+}

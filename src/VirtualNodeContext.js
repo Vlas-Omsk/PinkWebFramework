@@ -67,6 +67,14 @@ export default class VirtualNodeContext extends ExtendableProxy {
     }
 
     /**
+     * @param {string} script 
+     * @returns {any}
+     */
+    EvalFunction(script) {
+        return new Function("return (" + script + ")").call(this);
+    }
+
+    /**
      * @param {HookHandler} hookHandler 
      */
     AddHook(hookHandler) {

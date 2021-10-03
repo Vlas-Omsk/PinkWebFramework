@@ -91,4 +91,4 @@ sw.*
 
 .old
 package-lock.json
-todo
+/todo

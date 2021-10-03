@@ -385,14 +385,20 @@ export default class VirtualNode {
 
     #OnCreated() {
         this.#Dispatch("created", null);
+        for (let element of this.Elements)
+            element.#OnCreated();
     }
 
     #OnUpdated() {
         this.#Dispatch("updated", null);
+        for (let element of this.Elements)
+            element.#OnUpdated();
     }
 
     #OnDestroyed() {
         this.#Dispatch("destroyed", null);
+        for (let element of this.Elements)
+            element.#OnDestroyed();
     }
 
     /**
