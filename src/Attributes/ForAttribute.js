@@ -57,11 +57,10 @@ export default class ForAttribute extends VirtualNodeAttribute {
         const value = this.#type == ForType.In ? e.Key : e.Value;
         switch (e.Type) {
             case "set":
-                this.#RemoveElement(innerIdx);
-                this.#CreateElement(innerIdx, this.#targetName, value);
+                this.#ReplaceElement(innerIdx, this.#CreateElement(this.#targetName, value));
                 break;
             case "add":
-                this.#CreateElement(innerIdx, this.#targetName, value);
+                this.#InsertElement(innerIdx, this.#CreateElement(this.#targetName, value));
                 break;
             case "remove":
                 this.#RemoveElement(innerIdx);
@@ -115,7 +114,8 @@ export default class ForAttribute extends VirtualNodeAttribute {
         eval(`
             for (${this.#GetForFunction()}) {
                 const index = this.#dynamicElements.length;
-                this.#CreateElement(index, "${this.#targetName}", ${this.#targetName});
+                const element = this.#CreateElement("${this.#targetName}", ${this.#targetName});
+                this.#InsertElement(index, element);
             }
         `);
     }
@@ -124,13 +124,14 @@ export default class ForAttribute extends VirtualNodeAttribute {
      * @param {string} name 
      * @param {any} value 
      */
-    #CreateElement(index, name, value) {
+    #CreateElement(name, value) {
         const element = this.Element.Clone();
         element.Context[name] = value;
-        this.#InsertElement(index, element);
+        element.MakeDynamic(this.Element);
         if (element.IsComponent)
             this.Element.TemplatedParent.GetAttribute(ComponentAttribute).EvalScript(element.Context);
         AttributesInitializer.InitAttributes(element);
+        return element;
     }
 
     /**
@@ -152,11 +153,19 @@ export default class ForAttribute extends VirtualNodeAttribute {
         if (index > this.#dynamicElements.length || index < 0)
             throw new IndexOutOfRangeException("index");
 
-        virtualNode.MakeDynamic(this.Element);
         Array.insert(this.#dynamicElements, index, virtualNode);
         const templateIndex = this.Element.Parent.Elements.indexOf(this.Element);
         index += templateIndex;
         this.Element.Parent.InsertNode(index, virtualNode);
+    }
+
+    #ReplaceElement(index, virtualNode) {
+        if (index > this.#dynamicElements.length || index < 0)
+            throw new IndexOutOfRangeException("index");
+
+        const templateIndex = this.Element.Parent.Elements.indexOf(this.Element);
+        index += templateIndex;
+        this.Element.Parent.ReplaceNode(index, virtualNode);
     }
 
     #ClearElements() {

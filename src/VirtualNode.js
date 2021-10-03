@@ -61,7 +61,8 @@ export default class VirtualNode {
         if (this.#value == value)
             return;
         this.#value = value;
-        this.#htmlElement.nodeValue = value;
+        if (this.#htmlElement)
+            this.#htmlElement.nodeValue = value;
     }
 
     get HtmlAttributes() {
@@ -135,7 +136,8 @@ export default class VirtualNode {
             virtualNode.#parent = this;
             this.Elements.push(virtualNode);
         });
-        this.#Dispatch(null, "created");
+
+        this.#OnCreated();
     }
 
     /**
@@ -163,7 +165,7 @@ export default class VirtualNode {
         if (this.#htmlAttributes[name] == value)
             return;
         this.#htmlAttributes[name] = value;
-        if (this.#htmlElement.setAttribute && this.#IsAvailableAttribute(name))
+        if (this.#htmlElement && this.#htmlElement.setAttribute && this.#IsAvailableAttribute(name))
             this.#htmlElement.setAttribute(name, value);
     }
 
@@ -172,7 +174,7 @@ export default class VirtualNode {
      */
     RemoveHtmlAttribute(name) {
         delete this.#htmlAttributes[name];
-        if (this.#htmlElement.removeAttribute)
+        if (this.#htmlElement && this.#htmlElement.removeAttribute)
             this.#htmlElement.removeAttribute(name);
     }
 
@@ -272,14 +274,20 @@ export default class VirtualNode {
         if (index < 0 || index >= this.Elements.length)
             throw new IndexOutOfRangeException("index");
 
-        const element = virtualNode.#CreateHtml(true);
-        if (element) {
-            this.Elements[index].#htmlElement.after(element);
-            this.Elements[index].#htmlElement.remove();
-        }
-        virtualNode.#parent = this;
-        virtualNode.#htmlElement = element;
-        this.Elements[index] = virtualNode;
+        const element = this.Elements[index];
+
+        element.Elements = virtualNode.Elements;
+        element.#html = virtualNode.#html;
+        element.#parent = this;
+        element.#context = virtualNode.#context;
+        element.#tag = virtualNode.#tag;
+        element.#value = virtualNode.#value;
+        element.#htmlAttributes = virtualNode.#htmlAttributes;
+        element.#slotName = virtualNode.#slotName;
+        element.#refName = virtualNode.#refName;
+        element.#isComponent = virtualNode.#isComponent;
+
+        element.UpdateHtml();
     }
 
     /**
@@ -290,12 +298,14 @@ export default class VirtualNode {
         if (index < 0 || index >= this.Elements.length)
             throw new IndexOutOfRangeException("index");
 
-        const element = virtualNode.#CreateHtml(true);
-        if (element)
-            this.Elements[index].#htmlElement.after(element);
+        const element = document.createComment("");
+        this.Elements[index].#htmlElement.after(element);
         virtualNode.#parent = this;
         virtualNode.#htmlElement = element;
         Array.insert(this.Elements, index + 1, virtualNode);
+
+        virtualNode.#OnCreated();
+        virtualNode.UpdateHtml();
     }
 
     /**
@@ -309,6 +319,8 @@ export default class VirtualNode {
         if (element.HtmlElement)
             element.HtmlElement.remove();
         Array.removeAt(this.Elements, index);
+
+        element.#OnDestroyed();
     }
 
     /**
@@ -319,16 +331,14 @@ export default class VirtualNode {
     }
 
     UpdateHtml() {
-        const element = this.#CreateHtml();
+        const element = this.#CreateHtml(true);
         if (element)
             this.#htmlElement.after(element);
         if (this.#htmlElement)
             this.#htmlElement.remove();
         this.#htmlElement = element;
-        for (let type of this.#registeredEvents)
-            this.#htmlElement.addEventListener(type, e =>
-                this.#Dispatch(type, e));
-        this.#Dispatch(null, "updated");
+
+        this.#OnUpdated();
     }
 
     /**
@@ -350,8 +360,9 @@ export default class VirtualNode {
         if ((systemEventName in HTMLElement.prototype || systemEventName in Node.prototype) &&
             this.#registeredEvents.indexOf(name) == -1) {
             this.#registeredEvents.push(name);
-            this.#htmlElement.addEventListener(name, e =>
-                this.#Dispatch(name, e));
+            if (this.#htmlElement)
+                this.#htmlElement.addEventListener(name, e =>
+                    this.#Dispatch(name, e));
         }
         this.#eventTarget.On(name, callback);
     }
@@ -370,6 +381,18 @@ export default class VirtualNode {
      */
     #Dispatch(type, data) {
         this.#eventTarget.Dispatch(new VirtualNodeEventArgs(data, type, this));
+    }
+
+    #OnCreated() {
+        this.#Dispatch("created", null);
+    }
+
+    #OnUpdated() {
+        this.#Dispatch("updated", null);
+    }
+
+    #OnDestroyed() {
+        this.#Dispatch("destroyed", null);
     }
 
     /**
@@ -426,17 +449,19 @@ export default class VirtualNode {
                     element.setAttribute(name, this.#htmlAttributes[name]);
                 }
             }
-            if (updateInner && this.Elements.length > 0) {
-                const innerElements = [];
-                for (let element of this.Elements)
-                {
+            const innerElements = [];
+            for (let element of this.Elements)
+            {
+                if (updateInner)
                     element.#htmlElement = element.#CreateHtml(true);
-                    if (element.#htmlElement)
-                        innerElements.push(element.#htmlElement);
-                }
-                element.append(...innerElements);
+                if (element.#htmlElement)
+                    innerElements.push(element.#htmlElement);
             }
+            element.append(...innerElements);
         }
+        for (let type of this.#registeredEvents)
+            element.addEventListener(type, e =>
+                this.#Dispatch(type, e));
         this.#SetProperty(element);
         return element;
     }

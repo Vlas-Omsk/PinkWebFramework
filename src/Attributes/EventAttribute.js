@@ -9,7 +9,6 @@ export default class EventAttribute extends VirtualNodeAttribute {
         super(virtualNode);
         
         this.Update();
-        this.Element.On("updated", this.Update);
     }
 
     Update() {
