@@ -1,0 +1,107 @@
+<component>
+    <div
+        :style="return {
+            width: () => this.width,
+            height: () => this.height,
+            transform: () => 'rotateX(' + this.rotate.x + 'deg) rotateY(' + this.rotate.y + 'deg) rotateZ(' + this.rotate.z + 'deg)'
+        }"
+        class="cube"
+    >
+        <div
+            :style="return {
+                backgroundColor: 'red',
+                width: () => this.width,
+                height: () => this.height,
+                transform: () => 'translateZ(' + (this.depth / 2) + 'px)'
+            }"
+            class="cube__surface"
+        >1</div>
+        <div
+            :style="return {
+                backgroundColor: 'blue',
+                width: () => this.width,
+                height: () => this.height,
+                transform: () => 'translateZ(-' + (this.depth / 2) + 'px)'
+            }"
+            class="cube__surface"
+        >2</div>
+        <div
+            :style="return {
+                backgroundColor: 'indigo',
+                margin: () => '0 0 0 ' + ((this.width - this.depth) / 2) + 'px',
+                width: () => this.depth,
+                height: () => this.height,
+                transform: () => 'translateX(' + (this.width / 2) + 'px) rotateY(270deg)'
+            }"
+            class="cube__surface"
+        >3</div>
+        <div
+            :style="return {
+                backgroundColor: 'green',
+                margin: () => '0 0 0 ' + ((this.width - this.depth) / 2) + 'px',
+                width: () => this.depth,
+                height: () => this.height,
+                transform: () => 'translateX(-' + (this.width / 2) + 'px) rotateY(270deg)'
+            }"
+            class="cube__surface"
+        >4</div>
+        <div
+            :style="return {
+                backgroundColor: 'pink',
+                margin: () => ((this.height - this.depth) / 2) + 'px 0 0 0',
+                width: () => this.width,
+                height: () => this.depth,
+                transform: () => 'translateY(' + (this.height / 2) + 'px) rotateX(270deg)'
+            }"
+            class="cube__surface"
+        >5</div>
+        <div
+            :style="return {
+                backgroundColor: 'orange',
+                margin: () => ((this.height - this.depth) / 2) + 'px 0 0 0',
+                width: () => this.width,
+                height: () => this.depth,
+                transform: () => 'translateY(-' + (this.height / 2) + 'px) rotateX(270deg)'
+            }"
+            class="cube__surface"
+        >6</div>
+    </div>
+</component>
+
+<script>
+    // try it:
+    //   document.body.VirtualNode.GetRefs("cube")[0].Context.width = 400
+    //   document.body.VirtualNode.GetRefs("cube")[0].Context.height = 100
+
+    this.width = 200;
+    this.height = 200;
+    this.depth = 200;
+    this.rotate = {
+        x: 0,
+        y: 0,
+        z: 0
+    }
+
+    this.OnCreated = () => {
+        setInterval(() => {
+            this.rotate.x += 0.1;
+            this.rotate.y += 0.1;
+            this.rotate.z += 0.1;
+        }, 1);
+    }
+</script>
+
+<style>
+.cube {
+    transform-style: preserve-3d;
+}
+.cube__surface {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    opacity: 80%;
+    color: white;
+    font-size: 6em;
+}
+</style>

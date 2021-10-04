@@ -1,0 +1,13 @@
+[+] 1. Slots
+[+] 2. AsyncTasksCompleated Event
+[]  3. EventContext
+[+] 4. Classes and styles denamically binding from object
+[]  5. Scoped styles
+[+] 6. Reactivity optimization
+[+] 7. Component events
+[-] 8. Create instance of static scripts, e.g @click
+[+] 9. Inner hooks of component like Initialized(), Destroyed()
+    [+] I. Bug when VirtualNode.ReplaceNode(...)
+    []  II. Incorrect hook call
+[+] 10. 'ref' attribute
+[]  11. Reduce the number of requests to html

@@ -97,8 +97,11 @@ export default class BindAttribute extends VirtualNodeAttribute {
     #UpdateStyleProperty(name, value) {
         if (value instanceof Function)
             value = value.call(this.Element.Context);
-        if (this.Element.HtmlElement)
+        if (this.Element.HtmlElement) {
+            if (value.constructor == Number && name in this.Element.HtmlElement.style)
+                value = value + "px";
             this.Element.HtmlElement.style[name] = value;
+        }
     }
 
     /**

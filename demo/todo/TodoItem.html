@@ -1,9 +1,9 @@
 <component>
     <li class="item">
-        <input type="checkbox" ref="test" class="item__checkbox" @change="this.isChecked = !this.isChecked"/>
+        <input type="checkbox" class="item__checkbox" @change="this.isChecked = !this.isChecked"/>
         <div
             class="item__text"
-            :class="{ 'item__text-checked': () => this.isChecked }"
+            :class="return { 'item__text-checked': () => this.isChecked }"
         >{{this.item}}</div>
         <button class="item__close" @click="this.$emit('remove', this.item)">&times;</button>
     </li>

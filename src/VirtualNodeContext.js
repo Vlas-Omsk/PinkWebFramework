@@ -71,7 +71,7 @@ export default class VirtualNodeContext extends ExtendableProxy {
      * @returns {any}
      */
     EvalFunction(script) {
-        return new Function("return (" + script + ")").call(this);
+        return new Function(script).call(this);
     }
 
     /**
@@ -173,7 +173,7 @@ export default class VirtualNodeContext extends ExtendableProxy {
                 return true;
         }
         if (!this.#DeepSetValue(key, value))
-            object[key] = value;
+            return this.#SetValue(object, key, value);
         
         return true;
     }
@@ -186,8 +186,7 @@ export default class VirtualNodeContext extends ExtendableProxy {
     #DeepSetValue(key, value) {
         if (key in this.#object) {
             this.#object[key] = value;
-            this.#Dispatch("set", this.#object, key, value);
-            return true;
+            return this.#SetValue(this.#object, key, value);
         }
         if (this.#virtualNode.Parent) {
             if (!this.#virtualNode.IsComponent)
@@ -199,5 +198,28 @@ export default class VirtualNodeContext extends ExtendableProxy {
             }
         }
         return false;
+    }
+
+    /**
+     * @param {*} object
+     * @param {string | symbol} key
+     * @param {*} value
+     * @returns {boolean}
+     */
+    #SetValue(object, key, value) {
+        const isAdded = !(key in object);
+
+        if (value instanceof Array)
+            value = new ObservableArray(value);
+        else if (value instanceof Object && !(value instanceof Function))
+            value = new ObservableObject(value);
+        object[key] = value;
+
+        if (isAdded)
+            this.#Dispatch("add", object, key, value);
+        else
+            this.#Dispatch("set", object, key, value);
+
+        return true;
     }
 }

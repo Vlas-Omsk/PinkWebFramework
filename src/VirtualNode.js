@@ -137,7 +137,7 @@ export default class VirtualNode {
             this.Elements.push(virtualNode);
         });
 
-        this.#OnCreated();
+        this.OnCreated();
     }
 
     /**
@@ -304,7 +304,7 @@ export default class VirtualNode {
         virtualNode.#htmlElement = element;
         Array.insert(this.Elements, index + 1, virtualNode);
 
-        virtualNode.#OnCreated();
+        virtualNode.OnCreated();
         virtualNode.UpdateHtml();
     }
 
@@ -320,7 +320,7 @@ export default class VirtualNode {
             element.HtmlElement.remove();
         Array.removeAt(this.Elements, index);
 
-        element.#OnDestroyed();
+        element.OnDestroyed();
     }
 
     /**
@@ -338,7 +338,7 @@ export default class VirtualNode {
             this.#htmlElement.remove();
         this.#htmlElement = element;
 
-        this.#OnUpdated();
+        this.OnUpdated();
     }
 
     /**
@@ -383,22 +383,22 @@ export default class VirtualNode {
         this.#eventTarget.Dispatch(new VirtualNodeEventArgs(data, type, this));
     }
 
-    #OnCreated() {
+    OnCreated() {
         this.#Dispatch("created", null);
         for (let element of this.Elements)
-            element.#OnCreated();
+            element.OnCreated();
     }
 
-    #OnUpdated() {
+    OnUpdated() {
         this.#Dispatch("updated", null);
         for (let element of this.Elements)
-            element.#OnUpdated();
+            element.OnUpdated();
     }
 
-    #OnDestroyed() {
+    OnDestroyed() {
         this.#Dispatch("destroyed", null);
         for (let element of this.Elements)
-            element.#OnDestroyed();
+            element.OnDestroyed();
     }
 
     /**
