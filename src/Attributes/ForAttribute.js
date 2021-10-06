@@ -111,8 +111,11 @@ export default class ForAttribute extends VirtualNodeAttribute {
 
     Update() {
         this.#ClearElements();
+        let source;
+        if (this.#type != ForType.Cycle)
+            source = this.Element.Context.EvalScript(this.#sourceName);
         eval(`
-            for (${this.#GetForFunction()}) {
+            for (${this.#GetForFunction("source")}) {
                 const index = this.#dynamicElements.length;
                 const element = this.#CreateElement("${this.#targetName}", ${this.#targetName});
                 this.#InsertElement(index, element);
@@ -174,9 +177,10 @@ export default class ForAttribute extends VirtualNodeAttribute {
     }
 
     /**
+     * @param {string} sourceName
      * @returns {string}
      */
-    #GetForFunction() {
+    #GetForFunction(sourceName) {
         let result = "let " + this.#targetName;
         if (this.#type == ForType.Cycle) {
             if (this.#targetValue == null)
@@ -194,7 +198,10 @@ export default class ForAttribute extends VirtualNodeAttribute {
             result += " in ";
         if (this.#type == ForType.Of)
             result += " of ";
-        result += this.#sourceName;
+        if (this.#type != ForType.Cycle)
+            result += sourceName;
+        else
+            result += this.#sourceName;
         return result;
     }
 }

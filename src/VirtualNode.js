@@ -21,6 +21,7 @@ export default class VirtualNode {
     /** @type {boolean} */ #isTemplate = false
     /** @type {boolean} */ #isDynamic = false
     /** @type {boolean} */ #isComponent = false
+    /** @type {boolean} */ #isSvg = false
     /** @type {FrameworkEventTarget<VirtualNodeEventArgs>} */ #eventTarget = new FrameworkEventTarget()
     /** @type {string[]} */ #registeredEvents = []
 
@@ -74,7 +75,8 @@ export default class VirtualNode {
     }
     set Html(value) {
         this.#html = value;
-        this.UpdateHtml();
+        if (this.#html != value && this.#htmlElement)
+            this.#htmlElement.innerHTML = value;
     }
 
     get SlotName() {
@@ -101,6 +103,10 @@ export default class VirtualNode {
 
     get IsComponent() {
         return this.#isComponent;
+    }
+
+    get IsSvg() {
+        return this.#isSvg;
     }
 
     /**
@@ -131,9 +137,13 @@ export default class VirtualNode {
         else
             this.#tag = htmlElement.nodeName && htmlElement.nodeName.toLowerCase();
         this.#value = htmlElement.nodeValue;
+        if (this.#tag == "svg")
+            this.#isSvg = true;
         Array.prototype.forEach.call(htmlElement.childNodes, node => {
             const virtualNode = new VirtualNode(node);
             virtualNode.#parent = this;
+            if (this.#isSvg)
+                virtualNode.#isSvg = this.#isSvg;
             this.Elements.push(virtualNode);
         });
 
@@ -286,6 +296,7 @@ export default class VirtualNode {
         element.#slotName = virtualNode.#slotName;
         element.#refName = virtualNode.#refName;
         element.#isComponent = virtualNode.#isComponent;
+        element.#isSvg = virtualNode.#isSvg;
 
         element.UpdateHtml();
     }
@@ -418,6 +429,7 @@ export default class VirtualNode {
         element.#slotName = this.#slotName;
         element.#refName = this.#refName;
         element.#isComponent = this.#isComponent;
+        element.#isSvg = this.#isSvg;
         return element;
     }
 
@@ -445,10 +457,13 @@ export default class VirtualNode {
                 return;
             element = document.createTextNode(this.#value);
         } else {
-            element = document.createElement(this.#tag);
+            if (this.#isSvg)
+                element = document.createElementNS("http://www.w3.org/2000/svg", this.#tag);
+            else
+                element = document.createElement(this.#tag);
             if (this.#html)
                 element.innerHTML = this.#html;
-            else
+            else if (!String.isNullOrEmpty(this.#value))
                 element.nodeValue = this.#value;
             for (let name in this.#htmlAttributes) {
                 if (this.#IsAvailableAttribute(name)) {

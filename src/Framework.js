@@ -4,6 +4,7 @@ import BindAttribute from "./Attributes/BindAttribute.js";
 import ComponentAttribute from "./Attributes/ComponentAttribute.js";
 import EventAttribute from "./Attributes/EventAttribute.js";
 import ForAttribute from "./Attributes/ForAttribute.js";
+import RefAttribute from "./Attributes/RefAttribute.js";
 import ValueAttribute from "./Attributes/ValueAttribute.js";
 import VirtualNodeAttribute from "./Attributes/VirtualNodeAttribute.js";
 
@@ -12,11 +13,23 @@ window.BindAttribute = BindAttribute;
 window.ComponentAttribute = ComponentAttribute;
 window.EventAttribute = EventAttribute;
 window.ForAttribute = ForAttribute;
+window.RefAttribute = RefAttribute;
 window.ValueAttribute = ValueAttribute;
 window.VirtualNodeAttribute = VirtualNodeAttribute;
 
-// ./
+// ./Exceptions.js
 import * as Exceptions from "./Exceptions.js";
+
+window.IndexOutOfRangeException = Exceptions.IndexOutOfRangeException;
+window.NotImplementedException = Exceptions.NotImplementedException;
+window.ComponentRequiresSrcAttribute = Exceptions.ComponentRequiresSrcAttribute;
+window.ComponentCanOnlyContainOneElement = Exceptions.ComponentCanOnlyContainOneElement;
+window.ComponentRequiresSlot = Exceptions.ComponentRequiresSlot;
+window.SlotRequiresNameAttribute = Exceptions.SlotRequiresNameAttribute;
+window.SlotCanOnlyContainOneElement = Exceptions.SlotCanOnlyContainOneElement;
+window.BindingMustReturnDifferentType = Exceptions.BindingMustReturnDifferentType;
+
+// ./
 import ExtendableProxy from "./ExtendableProxy.js";
 import FrameworkEventArgs from "./FrameworkEventArgs.js";
 import FrameworkEventTarget from "./FrameworkEventTarget.js";
@@ -29,10 +42,6 @@ import VirtualNode from "./VirtualNode.js";
 import VirtualNodeContext from "./VirtualNodeContext.js";
 import VirtualNodeEventArgs from "./VirtualNodeEventArgs.js";
 
-window.IndexOutOfRangeException = Exceptions.IndexOutOfRangeException;
-window.NotImplementedException = Exceptions.NotImplementedException;
-window.ComponentRequiresSrcAttribute = Exceptions.ComponentRequiresSrcAttribute;
-window.ComponentCanOnlyContainOneElement = Exceptions.ComponentCanOnlyContainOneElement;
 window.ExtendableProxy = ExtendableProxy;
 window.FrameworkEventArgs = FrameworkEventArgs;
 window.FrameworkEventTarget = FrameworkEventTarget;
@@ -44,6 +53,8 @@ window.ValueChangedEventArgs = ValueChangedEventArgs;
 window.VirtualNode = VirtualNode;
 window.VirtualNodeContext = VirtualNodeContext;
 window.VirtualNodeEventArgs = VirtualNodeEventArgs;
+
+const frameworkPrefix = "PinkFramework";
 
 class Framework {
     /** @type {Framework} */ static #instance = new Framework()
@@ -78,7 +89,7 @@ class Framework {
     AsyncTaskEnd(asyncTaskObject) {
         this.#asyncTasks = this.#asyncTasks.filter(task => task != asyncTaskObject);
         if (this.#asyncTasks.length == 0) {
-            console.log("FrameworkAsyncTasksCompleated");
+            console.log(`[${frameworkPrefix}] FrameworkAsyncTasksCompleated`);
             window.dispatchEvent(new CustomEvent("FrameworkAsyncTasksCompleated", {}));
         }
     }
@@ -88,7 +99,7 @@ class Framework {
         this.#virtualBody = new VirtualNode(document.body);
         AttributesInitializer.InitAttributes(this.#virtualBody);
 
-        console.log("FrameworkSyncTasksCompleated");
+        console.log(`[${frameworkPrefix}] FrameworkSyncTasksCompleated`);
         window.dispatchEvent(new CustomEvent("FrameworkSyncTasksCompleated", {}));
 
         if (this.#asyncTasks.length == 0)
@@ -99,7 +110,7 @@ class Framework {
 
     #OnInitialized() {
         window.removeEventListener("FrameworkAsyncTasksCompleated", this.#OnInitialized);
-        console.log("FrameworkInitialized");
+        console.log(`[${frameworkPrefix}] FrameworkInitialized`);
         window.dispatchEvent(new CustomEvent("FrameworkInitialized", {}));
     }
 }

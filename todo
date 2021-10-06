@@ -8,6 +8,6 @@
 [-] 8. Create instance of static scripts, e.g @click
 [+] 9. Inner hooks of component like Initialized(), Destroyed()
     [+] I. Bug when VirtualNode.ReplaceNode(...)
-    []  II. Incorrect hook call
+    []  II. Incorrect hook call in ComponentAttribute.Update() at line 52
 [+] 10. 'ref' attribute
 []  11. Reduce the number of requests to html

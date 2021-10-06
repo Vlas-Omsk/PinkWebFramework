@@ -209,10 +209,10 @@ export default class VirtualNodeContext extends ExtendableProxy {
     #SetValue(object, key, value) {
         const isAdded = !(key in object);
 
-        if (value instanceof Array)
-            value = new ObservableArray(value);
-        else if (value instanceof Object && !(value instanceof Function))
-            value = new ObservableObject(value);
+        // if (value instanceof Array)
+        //     value = new ObservableArray(value);
+        // else if (value instanceof Object && !(value instanceof Function))
+        //     value = new ObservableObject(value);
         object[key] = value;
 
         if (isAdded)

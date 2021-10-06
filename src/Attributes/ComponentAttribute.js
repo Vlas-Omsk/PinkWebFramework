@@ -39,8 +39,12 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                 this.#script = children.textContent;
                 break;
             }
+        
+        for (let children of childrens)
+            if (children.tagName == "STYLE")
+                document.head.appendChild(children);
 
-        for (let children of childrens) {
+        for (let children of childrens)
             if (children.tagName == "COMPONENT") {
                 if (children.children.length > 1)
                     throw new ComponentCanOnlyContainOneElement();
@@ -52,10 +56,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                     this.#dynamicElement.OnCreated();
                     this.#dynamicElement.OnUpdated();
                 }
-            } else if (children.tagName == "STYLE") {
-                document.head.appendChild(children);
             }
-        }
 
         window.Framework.AsyncTaskEnd(this);
     }
@@ -68,7 +69,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         for (let propName in element.Context)
             if (/^on/i.test(propName))
                 element.On(propName.slice(2).toLocaleLowerCase(),
-                    () => element.Context[propName].call(element.Context));
+                    (e) => element.Context[propName].call(element.Context, e));
     }
 
     /**
@@ -106,7 +107,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
             if (!slotName)
                 slotName = "default";
             if (!slot) {
-                if (!String.isEmpty(templateSlot.HtmlAttributes["required"])) {
+                if (templateSlot.HtmlAttributes["required"] == undefined) {
                     templateSlot.Parent.RemoveNode(templateSlotIdx);
                     continue;
                 } else {

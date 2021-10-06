@@ -76,11 +76,11 @@
     this.width = 200;
     this.height = 200;
     this.depth = 200;
-    this.rotate = {
+    this.rotate = new ObservableObject({
         x: 0,
         y: 0,
         z: 0
-    }
+    });
 
     this.OnCreated = () => {
         setInterval(() => {
