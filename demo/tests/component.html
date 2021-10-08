@@ -5,5 +5,12 @@
 </component>
 
 <script>
-    
+this.$BeforeInitialize = e => {
+    console.log("BeforeInitialize");
+    console.log(this.i2);
+}
+this.$Initialized = e => {
+    console.log("Initialized");
+    console.log(this.i2);
+}
 </script>

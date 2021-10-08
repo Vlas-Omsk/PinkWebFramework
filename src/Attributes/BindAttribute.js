@@ -1,5 +1,5 @@
-import { BindingMustReturnDifferentType, NotImplementedException } from "../Exceptions.js";
 import GlobalObserverHandler from "../GlobalObserverHandler.js";
+import VirtualNode from "../VirtualNode.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
 export default class BindAttribute extends VirtualNodeAttribute {
@@ -14,50 +14,95 @@ export default class BindAttribute extends VirtualNodeAttribute {
 
     Update() {
         for (let attributeName in this.Element.HtmlAttributes) {
-            if (attributeName.length > 1 && attributeName[0] == ':') {
-                const fieldName = attributeName.slice(1);
-                if (fieldName == "style")
-                    this.#UpdateStyle(this.Element.HtmlAttributes[attributeName]);
-                if (fieldName == "class")
-                    this.#UpdateClass(this.Element.HtmlAttributes[attributeName]);
-                this.Element.Context.AddHook({
-                    get: (e) => this.#OnGet(e, fieldName, this.Element.HtmlAttributes[attributeName]),
-                    set: (e) => this.#OnSet(e, fieldName, this.Element.HtmlAttributes[attributeName])
-                });
+            if (attributeName == "binds" || (attributeName.length > 1 && attributeName[0] == ':')) {
+                const attributeValue = this.Element.HtmlAttributes[attributeName];
+                let value;
+                
+                this.Element.RemoveHtmlAttribute(attributeName);
+
+                if (attributeName == "binds") {
+                    value = this.Element.Parent.Context.EvalFunction(attributeValue);
+                    for (let name in value)
+                        this.#InitBind(name, value[name]);
+                } else if (attributeName.length > 1 && attributeName[0] == ':') {
+                    const bindName = attributeName.slice(1);
+                    if (bindName != "style" && bindName != "class") {
+                        value = () => this.Element.Parent.Context.EvalScript(attributeValue);
+                    } else {
+                        value = this.Element.Context.EvalFunction(attributeValue);
+                    }
+                    this.#InitBind(bindName, value);
+                }
             }
         }
     }
 
-    /**
-     * @param {string} classScript 
-     */
-    #UpdateClass(classScript) {
-        let classObject = this.Element.Context.EvalFunction(classScript);
-        if (classObject instanceof Function)
-            classObject = classObject.call(this.Element.Context);
-        if (!(classObject instanceof Object))
-            throw new BindingMustReturnDifferentType("Object<string, (Function | string)>");
-        
-        for (let className in classObject) {
-            const anonymousUpdateClassProperty = this.#UpdateClassProperty.bind(this, className, classObject[className]);
-            this.Element.On("updated", anonymousUpdateClassProperty);
-            const observers = GlobalObserverHandler.GetDependentObserver(anonymousUpdateClassProperty);
-            for (let observer of observers) {
-                observer.target.On("set", e => {
-                    if (observer.keys.indexOf(e.Key) != -1)
-                        anonymousUpdateClassProperty();
-                });
-            }
+    #InitBind(bindName, bindValue) {
+        switch (bindName) {
+            case "style":
+            case "class":
+                let updateFunc;
+
+                if (bindName == "style")
+                    updateFunc = this.#UpdateStyleBind.bind(this);
+                else if (bindName == "class")
+                    updateFunc = this.#UpdateClassBind.bind(this);
+
+                for (let name in bindValue) {
+                    const value = bindValue[name];
+                    let func;
+                    if (value instanceof Function) {
+                        func = () => updateFunc(name, value());
+                        const observers = GlobalObserverHandler.GetDependentObserver(func);
+                        for (let observer of observers) {
+                            observer.target.On("set", e => {
+                                if (observer.keys.indexOf(e.Key) != -1)
+                                    func();
+                            });
+                        }
+                    } else {
+                        func = updateFunc.bind(this, name, value);
+                        func();
+                    }
+                    this.Element.On("updated", func);
+                }
+                break;
+            default:
+                /** @type {import("../VirtualNodeContext.js").HookHandler} */
+                const hookHandler = {};
+                if (bindValue instanceof Function) {
+                    hookHandler.get = this.#OnGet.bind(this, bindValue.bind(this.Element.Parent.Context));
+                } else if (bindValue["get"] || bindValue["set"]) {
+                    if (bindValue["get"] instanceof Function)
+                        hookHandler.get = this.#OnGet.bind(this, bindValue["get"].bind(this.Element.Parent.Context));
+                    else if (bindValue["get"])
+                        hookHandler.get = this.#OnGet.bind(this, () => bindValue["get"]);
+                    
+                    if (bindValue["set"] instanceof Function)
+                        hookHandler.set = bindValue["set"].bind(this.Element.Parent.Context);
+                } else {
+                    hookHandler.get = this.#OnGet.bind(this, () => bindValue);
+                }
+                this.Element.Context.AddHook(bindName, hookHandler);
+                break;
         }
+    }
+
+    /**
+     * @param {Function} func 
+     * @param {import("../VirtualNodeContext.js").HookGetEventArgs} e 
+     * @returns 
+     */
+    #OnGet(func, e) {
+        e.handled = true;
+        return func(e);
     }
 
     /**
      * @param {string} name 
-     * @param {Function | string} value 
+     * @param {any} value 
      */
-    #UpdateClassProperty(name, value) {
-        if (value instanceof Function)
-            value = value.call(this.Element.Context);
+    #UpdateClassBind(name, value) {
         if (this.Element.HtmlElement) {
             const isClaasContains = this.Element.HtmlElement.classList.contains(name);
             if (value && !isClaasContains)
@@ -68,67 +113,14 @@ export default class BindAttribute extends VirtualNodeAttribute {
     }
 
     /**
-     * @param {string} styleScript 
-     */
-    #UpdateStyle(styleScript) {
-        let styleObject = this.Element.Context.EvalFunction(styleScript);
-        if (styleObject instanceof Function)
-            styleObject = styleObject.call(this.Element.Context);
-        if (!(styleObject instanceof Object))
-            throw new BindingMustReturnDifferentType("Object<string, (Function | string)>");
-
-        for (let styleName in styleObject) {
-            const anonymousUpdateStyleProperty = this.#UpdateStyleProperty.bind(this, styleName, styleObject[styleName]);
-            this.Element.On("updated", anonymousUpdateStyleProperty);
-            const observers = GlobalObserverHandler.GetDependentObserver(anonymousUpdateStyleProperty);
-            for (let observer of observers) {
-                observer.target.On("set", e => {
-                    if (observer.keys.indexOf(e.Key) != -1)
-                        anonymousUpdateStyleProperty();
-                });
-            }
-        }
-    }
-
-    /**
      * @param {string} name 
-     * @param {Function | string} value 
+     * @param {any} value 
      */
-    #UpdateStyleProperty(name, value) {
-        if (value instanceof Function)
-            value = value.call(this.Element.Context);
+    #UpdateStyleBind(name, value) {
         if (this.Element.HtmlElement) {
             if (value.constructor == Number && name in this.Element.HtmlElement.style)
                 value = value + "px";
             this.Element.HtmlElement.style[name] = value;
-        }
-    }
-
-    /**
-     * @param {import("../VirtualNodeContext.js").HookGetEventArgs} e 
-     * @param {string} targetFieldName 
-     * @param {string} sourceFieldName 
-     * @returns {any}
-     */
-    #OnGet(e, targetFieldName, sourceFieldName) {
-        if (e.key == targetFieldName)
-        {
-            e.handled = true;
-            return this.Element.Parent.Context.EvalScript(sourceFieldName);
-        }
-    }
-
-    /**
-     * @param {import("../VirtualNodeContext.js").HookSetEventArgs} e 
-     * @param {string} targetFieldName 
-     * @param {string} sourceFieldName 
-     */
-    #OnSet(e, targetFieldName, sourceFieldName) {
-        if (e.key == targetFieldName)
-        {
-            throw NotImplementedException();
-            e.handled = true;
-            this.Element.Parent.Context[sourceFieldName] = e.value;
         }
     }
 }

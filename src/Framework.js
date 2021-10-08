@@ -117,10 +117,20 @@ class Framework {
 
 String.isEmpty = function(self) {
     return (self.length === 0 || !self.trim());
-}
+};
 String.isNullOrEmpty = function(self) {
     return (!self || String.isEmpty(self));
-}
+};
+String.hashCode = function(self) {
+    var hash = 0, i, chr;
+    if (self.length === 0) return hash;
+    for (i = 0; i < self.length; i++) {
+        chr   = self.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+};
 Array.insert = function(self, index, item) {
     Array.prototype.splice.call(self, index, 0, item)
 };

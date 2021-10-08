@@ -131,9 +131,6 @@ export default class ForAttribute extends VirtualNodeAttribute {
         const element = this.Element.Clone();
         element.Context[name] = value;
         element.MakeDynamic(this.Element);
-        if (element.IsComponent)
-            this.Element.TemplatedParent.GetAttribute(ComponentAttribute).EvalScript(element);
-        AttributesInitializer.InitAttributes(element);
         return element;
     }
 
@@ -157,18 +154,25 @@ export default class ForAttribute extends VirtualNodeAttribute {
             throw new IndexOutOfRangeException("index");
 
         Array.insert(this.#dynamicElements, index, virtualNode);
-        const templateIndex = this.Element.Parent.Elements.indexOf(this.Element);
-        index += templateIndex;
+        index += this.Element.Parent.Elements.indexOf(this.Element);
         this.Element.Parent.InsertNode(index, virtualNode);
+
+        if (virtualNode.IsComponent)
+            this.Element.TemplatedParent.GetAttribute(ComponentAttribute).EvalScript(virtualNode);
+        
+        AttributesInitializer.InitAttributes(virtualNode);
+        virtualNode.UpdateHtml();
     }
 
     #ReplaceElement(index, virtualNode) {
         if (index > this.#dynamicElements.length || index < 0)
             throw new IndexOutOfRangeException("index");
 
-        const templateIndex = this.Element.Parent.Elements.indexOf(this.Element);
-        index += templateIndex + 1;
-        this.Element.Parent.ReplaceNode(index, virtualNode);
+        index += this.Element.Parent.Elements.indexOf(this.Element) + 1;
+        virtualNode = this.Element.Parent.ReplaceNode(index, virtualNode);
+
+        AttributesInitializer.InitAttributes(virtualNode);
+        virtualNode.UpdateHtml();
     }
 
     #ClearElements() {

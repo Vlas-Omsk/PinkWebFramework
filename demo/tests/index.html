@@ -12,8 +12,6 @@
     <title>Document</title>
 </head>
 <body>
-    <div for="i = 0; i < 10; i++">
-        {{this.i}}
-    </div>
+    <component src="component.html" for="i = 0; i < 10; i++" :i2="44+3"></component>
 </body>
 </html>

@@ -11,6 +11,8 @@ export default class AttributesInitializer {
      * @param {VirtualNode} virtualNode 
      */
     static InitAttributes(virtualNode) {
+        virtualNode.OnBeforeInitialize();
+
         if (this.TryInitComponentAttribute(virtualNode))
             return;
         if (this.TryInitForAttribute(virtualNode))
@@ -27,6 +29,8 @@ export default class AttributesInitializer {
                 this.InitAttributes(element);
             }
         }
+
+        virtualNode.OnInitialized();
     }
 
     /**
@@ -72,7 +76,7 @@ export default class AttributesInitializer {
      */
     static #TestBindAttributes(attributes) {
         for (let name in attributes)
-            if (name.length > 1 && name[0] == ':')
+            if ((name.length > 1 && name[0] == ':') || name == "binds")
                 return true;
         return false;
     }

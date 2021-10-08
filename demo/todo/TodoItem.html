@@ -12,13 +12,16 @@
 <script>
     this.isChecked = false;
 
-    this.OnCreated = () => {
+    this.$Initialized = () => {
         console.log("Created item: ", this.item);
     }
-    this.OnUpdated = () => {
+    this.$Updated = () => {
         console.log("Updated item: ", this.item);
     }
-    this.OnDestroyed = () => {
+    this.$BeforeDestroy = () => {
+        console.log("Before remove item: ", this.item);
+    }
+    this.$Destroyed = () => {
         console.log("Removed item: ", this.item);
     }
 </script>

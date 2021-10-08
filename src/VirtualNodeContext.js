@@ -43,7 +43,7 @@ import VirtualNode from "./VirtualNode.js";
 export default class VirtualNodeContext extends ExtendableProxy {
     /** @type {VirtualNode} */ #virtualNode
     /** @type {FrameworkEventTarget} */ #eventTarget = new FrameworkEventTarget()
-    /** @type {HookHandler[]} */ #hookHandlers = []
+    /** @type {Object<string, HookHandler[]>} */ #hookHandlers = {}
     /** @type {any} */ #object
 
     /**
@@ -75,17 +75,47 @@ export default class VirtualNodeContext extends ExtendableProxy {
     }
 
     /**
+     * @param {string} key
      * @param {HookHandler} hookHandler 
      */
-    AddHook(hookHandler) {
-        this.#hookHandlers.push(hookHandler);
+    AddHook(key, hookHandler) {
+        if (!this.#hookHandlers[key])
+            this.#hookHandlers[key] = [hookHandler];
+        else
+            this.#hookHandlers[key].push(hookHandler);
     }
 
     /**
+     * @param {string} key
      * @param {HookHandler} hookHandler 
      */
-    RemoveHook(hookHandler) {
-        this.#hookHandlers = this.#hookHandlers.filter(handler => handler != hookHandler);
+    RemoveHook(key, hookHandler) {
+        if (this.#hookHandlers[key])
+            this.#hookHandlers[key] = this.#hookHandlers[key].filter(hh => hh != hookHandler);
+    }
+
+    /**
+     * @param {string} type
+     * @param {HookGetEventArgs | HookSetEventArgs} eventArgs
+     */
+    #DispatchHook(type, eventArgs) {
+        if (this.#hookHandlers[eventArgs.key])
+            for (let hookHandler of this.#hookHandlers[eventArgs.key]) {
+                if (!hookHandler[type])
+                    continue;
+                const value = hookHandler[type](eventArgs);
+                if (eventArgs.handled)
+                    return value;
+            }
+        if (this.#hookHandlers["any"])
+            for (let hookHandler of this.#hookHandlers["any"]) {
+                if (!hookHandler[type])
+                    continue;
+                const value = hookHandler[type](eventArgs);
+                if (eventArgs.handled)
+                    return value;
+            }
+        return null;
     }
 
     /**
@@ -123,13 +153,9 @@ export default class VirtualNodeContext extends ExtendableProxy {
     #OnGet(object, key) {
         /** @type {HookGetEventArgs} */
         const e = { object, key, handled: false, sender: this };
-        for (let hookHandler of this.#hookHandlers) {
-            if (!hookHandler.get)
-                continue;
-            const value = hookHandler.get(e);
-            if (e.handled)
-                return value;
-        }
+        const value = this.#DispatchHook("get", e);
+        if (e.handled)
+            return value;
         if (key in object) {
             const value = object[key];
             if (!(key in VirtualNodeContext.prototype))
@@ -165,13 +191,9 @@ export default class VirtualNodeContext extends ExtendableProxy {
     #OnSet(object, key, value) {
         /** @type {HookSetEventArgs} */
         const e = { object, key, value, handled: false, sender: this };
-        for (let hookHandler of this.#hookHandlers) {
-            if (!hookHandler.set)
-                continue;
-            hookHandler.set(e);
-            if (e.handled)
-                return true;
-        }
+        this.#DispatchHook("set", e);
+        if (e.handled)
+            return true;
         if (!this.#DeepSetValue(key, value))
             return this.#SetValue(object, key, value);
         

@@ -146,8 +146,6 @@ export default class VirtualNode {
                 virtualNode.#isSvg = this.#isSvg;
             this.Elements.push(virtualNode);
         });
-
-        this.OnCreated();
     }
 
     /**
@@ -287,9 +285,12 @@ export default class VirtualNode {
         const element = this.Elements[index];
 
         element.Elements = virtualNode.Elements;
+        for (let childElement of element.Elements)
+            childElement.#parent = element;
         element.#html = virtualNode.#html;
         element.#parent = this;
-        element.#context = virtualNode.#context;
+        for (let property in virtualNode.#context)
+            element.#context[property] = virtualNode.#context[property];
         element.#tag = virtualNode.#tag;
         element.#value = virtualNode.#value;
         element.#htmlAttributes = virtualNode.#htmlAttributes;
@@ -298,7 +299,7 @@ export default class VirtualNode {
         element.#isComponent = virtualNode.#isComponent;
         element.#isSvg = virtualNode.#isSvg;
 
-        element.UpdateHtml();
+        return element;
     }
 
     /**
@@ -309,14 +310,13 @@ export default class VirtualNode {
         if (index < 0 || index >= this.Elements.length)
             throw new IndexOutOfRangeException("index");
 
-        const element = document.createComment("");
-        this.Elements[index].#htmlElement.after(element);
+        virtualNode.OnCreated();
+
         virtualNode.#parent = this;
-        virtualNode.#htmlElement = element;
+        virtualNode.#htmlElement = null;
         Array.insert(this.Elements, index + 1, virtualNode);
 
-        virtualNode.OnCreated();
-        virtualNode.UpdateHtml();
+        virtualNode.OnMounted();
     }
 
     /**
@@ -325,8 +325,11 @@ export default class VirtualNode {
     RemoveNode(index) {
         if (index < 0 || index >= this.Elements.length)
             throw new IndexOutOfRangeException("index");
-        
+
         const element = this.Elements[index];
+            
+        element.OnBeforeDestroy();
+
         if (element.HtmlElement)
             element.HtmlElement.remove();
         Array.removeAt(this.Elements, index);
@@ -342,11 +345,20 @@ export default class VirtualNode {
     }
 
     UpdateHtml() {
+        this.OnBeforeUpdate();
+
         const element = this.#CreateHtml(true);
-        if (element)
-            this.#htmlElement.after(element);
-        if (this.#htmlElement)
-            this.#htmlElement.remove();
+        if (element) {
+            if (this.#htmlElement) {
+                this.#htmlElement.replaceWith(element);
+            } else {
+                const index = this.#parent.Elements.indexOf(this);
+                if (index == 0 && this.#parent.#htmlElement)
+                    this.#parent.#htmlElement.appendChild(element);
+                else if (this.#parent.Elements[index - 1].#htmlElement)
+                    this.#parent.Elements[index - 1].#htmlElement.after(element);
+            }
+        }
         this.#htmlElement = element;
 
         this.OnUpdated();
@@ -395,15 +407,45 @@ export default class VirtualNode {
     }
 
     OnCreated() {
-        this.#Dispatch("created", null);
+        this.#Dispatch("Created", null);
         for (let element of this.Elements)
             element.OnCreated();
     }
 
+    OnMounted() {
+        this.#Dispatch("Mounted", null);
+        for (let element of this.Elements)
+            element.OnMounted();
+    }
+
+    OnBeforeInitialize() {
+        this.#Dispatch("BeforeInitialize", null);
+        for (let element of this.Elements)
+            element.OnBeforeInitialize();
+    }
+
+    OnInitialized() {
+        this.#Dispatch("Initialized", null);
+        for (let element of this.Elements)
+            element.OnInitialized();
+    }
+
+    OnBeforeUpdate() {
+        this.#Dispatch("BeforeUpdate", null);
+        for (let element of this.Elements)
+            element.OnBeforeUpdate();
+    }
+
     OnUpdated() {
-        this.#Dispatch("updated", null);
+        this.#Dispatch("Updated", null);
         for (let element of this.Elements)
             element.OnUpdated();
+    }
+
+    OnBeforeDestroy() {
+        this.#Dispatch("BeforeDestroy", null);
+        for (let element of this.Elements)
+            element.OnBeforeDestroy();
     }
 
     OnDestroyed() {

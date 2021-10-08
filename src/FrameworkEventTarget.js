@@ -35,8 +35,7 @@ export default class FrameworkEventTarget {
     Off(type, callback) {
         type = this.#PreProcessType(type);
         if (this.#dispatchHandlers[type])
-            this.#dispatchHandlers[type] =
-                this.#dispatchHandlers[type] = this.#dispatchHandlers[type].filter(cb => cb != callback);
+            this.#dispatchHandlers[type] = this.#dispatchHandlers[type].filter(cb => cb != callback);
     }
 
     /**

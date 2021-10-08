@@ -1,10 +1,11 @@
 import { ComponentCanOnlyContainOneElement, ComponentRequiresSlot, ComponentRequiresSrcAttribute, SlotCanOnlyContainOneElement, SlotRequiresNameAttribute } from "../Exceptions.js";
 import VirtualNode from "../VirtualNode.js";
-import VirtualNodeContext from "../VirtualNodeContext.js";
 import AttributesInitializer from "./AttributesInitializer.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
 export default class ComponentAttribute extends VirtualNodeAttribute {
+    /** @type {number[]} */ static #existingStyleHashes = []
+
     /** @type {string} */ #source
     /** @type {string} */ #script
     /** @type {VirtualNode} */ #dynamicElement
@@ -35,15 +36,18 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         const childrens = (await this.#TryGetHtmlContent()).children;
 
         for (let children of childrens)
+            if (children.tagName == "STYLE") {
+                const hash = String.hashCode(children.innerHTML);
+                if (ComponentAttribute.#existingStyleHashes.indexOf(hash) == -1) {
+                    ComponentAttribute.#existingStyleHashes.push(hash);
+                    document.head.appendChild(children);
+                }
+            }
+        for (let children of childrens)
             if (children.tagName == "SCRIPT") {
                 this.#script = children.textContent;
                 break;
             }
-        
-        for (let children of childrens)
-            if (children.tagName == "STYLE")
-                document.head.appendChild(children);
-
         for (let children of childrens)
             if (children.tagName == "COMPONENT") {
                 if (children.children.length > 1)
@@ -53,8 +57,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                 {
                     this.EvalScript(this.#dynamicElement);
                     AttributesInitializer.InitAttributes(this.#dynamicElement);
-                    this.#dynamicElement.OnCreated();
-                    this.#dynamicElement.OnUpdated();
+                    this.#dynamicElement.UpdateHtml();
                 }
             }
 
@@ -67,8 +70,8 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
     EvalScript(element) {
         element.Context.EvalScript(this.#script);
         for (let propName in element.Context)
-            if (/^on/i.test(propName))
-                element.On(propName.slice(2).toLocaleLowerCase(),
+            if (/^\$/i.test(propName))
+                element.On(propName.slice(1).toLocaleLowerCase(),
                     (e) => element.Context[propName].call(element.Context, e));
     }
 
