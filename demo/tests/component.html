@@ -14,3 +14,14 @@ this.$Initialized = e => {
     console.log(this.i2);
 }
 </script>
+
+<style lang="scss">
+@import '/demo/tests/vars.scss';
+
+$disp: block;
+
+.alert {
+  border: 1px solid $border-dark;
+  display: $disp;
+}
+</style>

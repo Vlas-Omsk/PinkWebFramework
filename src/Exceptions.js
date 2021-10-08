@@ -57,3 +57,22 @@ export class BindingMustReturnDifferentType extends Error {
         super("BindingMustReturnDifferentType:\r\nThe binding must return a '" + typeName + "' type");
     }
 }
+
+export class UnknownLangException extends Error {
+    /**
+     * @param {string} langName 
+     */
+    constructor(langName) {
+        super("UnknownLangException:\r\nUnknown lang '" + langName + "'");
+    }
+}
+
+export class LangNotLoadedException extends Error {
+    /**
+     * @param {string} langName 
+     * @param {string} packageUrl
+     */
+    constructor(langName, packageUrl) {
+        super("LangNotLoadedException:\r\nLanguage '" + langName + "' not loaded, include " + packageUrl + " in the main page head to use the specified language");
+    }
+}
