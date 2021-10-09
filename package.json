@@ -9,7 +9,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "build": "webpack --config webpack.dev.config.js",
+    "buildprod": "webpack --config webpack.prod.config.js"
   },
   "keywords": [],
   "author": "",

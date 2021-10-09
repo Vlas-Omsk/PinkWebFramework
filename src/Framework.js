@@ -20,14 +20,17 @@ window.VirtualNodeAttribute = VirtualNodeAttribute;
 // ./Exceptions.js
 import * as Exceptions from "./Exceptions.js";
 
+window.FrameworkException = Exceptions.FrameworkException;
 window.IndexOutOfRangeException = Exceptions.IndexOutOfRangeException;
 window.NotImplementedException = Exceptions.NotImplementedException;
-window.ComponentRequiresSrcAttribute = Exceptions.ComponentRequiresSrcAttribute;
-window.ComponentCanOnlyContainOneElement = Exceptions.ComponentCanOnlyContainOneElement;
-window.ComponentRequiresSlot = Exceptions.ComponentRequiresSlot;
-window.SlotRequiresNameAttribute = Exceptions.SlotRequiresNameAttribute;
-window.SlotCanOnlyContainOneElement = Exceptions.SlotCanOnlyContainOneElement;
-window.BindingMustReturnDifferentType = Exceptions.BindingMustReturnDifferentType;
+window.ComponentRequiresSrcAttributeException = Exceptions.ComponentRequiresSrcAttributeException;
+window.ComponentCanOnlyContainOneElementException = Exceptions.ComponentCanOnlyContainOneElementException;
+window.ComponentRequiresSlotException = Exceptions.ComponentRequiresSlotException;
+window.SlotRequiresNameAttributeException = Exceptions.SlotRequiresNameAttributeException;
+window.SlotCanOnlyContainOneElementException = Exceptions.SlotCanOnlyContainOneElementException;
+window.BindingMustReturnDifferentTypeException = Exceptions.BindingMustReturnDifferentTypeException;
+window.UnknownLangException = Exceptions.UnknownLangException;
+window.LangNotLoadedException = Exceptions.LangNotLoadedException;
 
 // ./
 import ExtendableProxy from "./ExtendableProxy.js";

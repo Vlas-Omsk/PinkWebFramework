@@ -1,78 +1,88 @@
-export class IndexOutOfRangeException extends RangeError {
+export class FrameworkException extends Error {
+    /**
+     * @param {string} message 
+     */
+    constructor (message) {
+        super();
+        this.message = `${this.constructor.name}:\r\n${message}`;
+    }
+}
+
+export class IndexOutOfRangeException extends FrameworkException {
     /**
      * @param {string} parameterName 
      */
     constructor(parameterName) {
-        super("IndexOutOfRangeException:\r\nIndex was out of range. Must be non-negative and less than the size of the collection.\r\nParameter name: " + parameterName);
+        super(`Index was out of range. Must be non-negative and less than the size of the collection.\r\nParameter name: ${parameterName}`);
     }
 }
 
-export class NotImplementedException extends Error {
+export class NotImplementedException extends FrameworkException {
     /**
      * @param {string} message 
      */
     constructor(message) {
-        super("NotImplementedException:\r\n" + message);
+        super(message);
     }
 }
 
-export class ComponentRequiresSrcAttribute extends Error {
+export class ComponentRequiresSrcAttributeException extends FrameworkException {
     constructor() {
-        super("ComponentRequiresSrcAttribute:\r\nComponent requires 'src' attribute");
+        super("Component requires 'src' attribute");
     }
 }
 
-export class ComponentCanOnlyContainOneElement extends Error {
+export class ComponentCanOnlyContainOneElementException extends FrameworkException {
     constructor() {
-        super("ComponentCanOnlyContainOneElement:\r\nA component can only contain one element");
+        super("A component can only contain one element");
     }
 }
 
-export class ComponentRequiresSlot extends Error {
+export class ComponentRequiresSlotException extends FrameworkException {
     /**
      * @param {string} slotName 
      */
     constructor(slotName) {
-        super("ComponentRequiresSlot:\r\nThe component requires a slot '" + slotName + "'");
+        super(`The component requires a slot '${slotName}'`);
     }
 }
 
-export class SlotRequiresNameAttribute extends Error {
+export class SlotRequiresNameAttributeException extends FrameworkException {
     constructor() {
-        super("SlotRequiresNameAttribute:\r\nSlot requires 'name' attribute");
+        super("Slot requires 'name' attribute");
     }
 }
 
-export class SlotCanOnlyContainOneElement extends Error {
+export class SlotCanOnlyContainOneElementException extends FrameworkException {
     constructor() {
-        super("SlotCanOnlyContainOneElement:\r\nA slot can only contain one element");
+        super("A slot can only contain one element");
     }
 }
 
-export class BindingMustReturnDifferentType extends Error {
+export class BindingMustReturnDifferentTypeException extends FrameworkException {
     /**
      * @param {string} typeName 
      */
     constructor(typeName) {
-        super("BindingMustReturnDifferentType:\r\nThe binding must return a '" + typeName + "' type");
+        super(`The binding must return a '${typeName}' type`);
     }
 }
 
-export class UnknownLangException extends Error {
+export class UnknownLangException extends FrameworkException {
     /**
      * @param {string} langName 
      */
     constructor(langName) {
-        super("UnknownLangException:\r\nUnknown lang '" + langName + "'");
+        super(`Unknown lang '${langName}'`);
     }
 }
 
-export class LangNotLoadedException extends Error {
+export class LangNotLoadedException extends FrameworkException {
     /**
      * @param {string} langName 
      * @param {string} packageUrl
      */
     constructor(langName, packageUrl) {
-        super("LangNotLoadedException:\r\nLanguage '" + langName + "' not loaded, include " + packageUrl + " in the main page head to use the specified language");
+        super(`Language '${langName}' not loaded, include ${packageUrl} in the main page head to use the specified language`);
     }
 }

@@ -33,6 +33,10 @@ export default class ValueAttribute extends VirtualNodeAttribute {
                 if (observer.keys.indexOf(e.Key) != -1)
                     this.Update();
             });
+            observer.target.On("add", e => {
+                if (observer.keys.indexOf(e.Key) != -1)
+                    this.Update();
+            });
         }
     }
 

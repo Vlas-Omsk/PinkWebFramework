@@ -1,4 +1,12 @@
-import { ComponentCanOnlyContainOneElement, ComponentRequiresSlot, ComponentRequiresSrcAttribute, LangNotLoadedException, SlotCanOnlyContainOneElement, SlotRequiresNameAttribute, UnknownLangException } from "../Exceptions.js";
+import { 
+    ComponentCanOnlyContainOneElementException,
+    ComponentRequiresSlotException,
+    ComponentRequiresSrcAttributeException,
+    LangNotLoadedException,
+    SlotCanOnlyContainOneElementException,
+    SlotRequiresNameAttributeException,
+    UnknownLangException
+} from "../Exceptions.js";
 import VirtualNode from "../VirtualNode.js";
 import AttributesInitializer from "./AttributesInitializer.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
@@ -25,7 +33,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
 
         this.#source = virtualNode.HtmlAttributes["src"];
         if (!this.#source)
-            throw new ComponentRequiresSrcAttribute();
+            throw new ComponentRequiresSrcAttributeException();
         virtualNode.RemoveHtmlAttribute("src");
         
         this.Update();
@@ -47,7 +55,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         for (let children of childrens)
             if (children.tagName == "COMPONENT") {
                 if (children.children.length > 1)
-                    throw new ComponentCanOnlyContainOneElement();
+                    throw new ComponentCanOnlyContainOneElementException();
                 this.#dynamicElement = this.#CreateElement(children.children[0]);
                 if (!AttributesInitializer.TryInitForAttribute(this.#dynamicElement))
                 {
@@ -87,7 +95,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                     case "scss":
                     case "sass":
                         if (!window["Sass"])
-                            throw new LangNotLoadedException(langAttribute, "https://github.com/medialize/sass.js/releases");
+                            throw new LangNotLoadedException(langAttribute, "https://github.com/medialize/sass.js");
                         if (!ComponentAttribute.#isSassConfigured) {
                             ComponentAttribute.#isSassConfigured = true;
                             Sass.options({
@@ -146,7 +154,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         for (let templateSlot of templateSlots) {
             const templateSlotIdx = templateSlot.Parent.Elements.indexOf(templateSlot);
             if (!templateSlot.HtmlAttributes["name"] && haveDefaultSlot)
-                throw new SlotRequiresNameAttribute();
+                throw new SlotRequiresNameAttributeException();
             let slotName = templateSlot.HtmlAttributes["name"];
             const slot = slots.find(element =>
                 slotName ? element.HtmlAttributes["name"] == slotName : !element.HtmlAttributes["name"]);
@@ -157,17 +165,17 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                     templateSlot.Parent.RemoveNode(templateSlotIdx);
                     continue;
                 } else {
-                    throw new ComponentRequiresSlot(slotName);
+                    throw new ComponentRequiresSlotException(slotName);
                 }
             }
             if (!slot.HtmlAttributes["name"]) {
                 if (!haveDefaultSlot)
                     haveDefaultSlot = true;
                 else
-                    throw new SlotRequiresNameAttribute();
+                    throw new SlotRequiresNameAttributeException();
             }
             if (slot.HtmlElement.children.length > 1)
-                throw new SlotCanOnlyContainOneElement();
+                throw new SlotCanOnlyContainOneElementException();
             templateSlot.Parent.ReplaceNode(templateSlotIdx, slot.HtmlElement.children[0].VirtualNode);
             templateSlot.Parent.Elements[templateSlotIdx].MakeSlot(slotName);
         }
