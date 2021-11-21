@@ -63,7 +63,7 @@ export default class VirtualNodeContext extends ExtendableProxy {
      * @returns {any}
      */
     EvalScript(script) {
-        return eval(script);
+        return (function() { return eval(script) }).call(this);
     }
 
     /**

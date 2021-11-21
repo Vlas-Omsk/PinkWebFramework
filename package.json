@@ -2,17 +2,23 @@
   "name": "PinkFramework",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/PinkFramework.js",
+  "main": "src/Framework.js",
   "dependencies": {
     "webpack-cli": "^4.8.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-transform-runtime": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
+    "babel-loader": "^8.2.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack.dev.config.js",
-    "buildprod": "webpack --config webpack.prod.config.js"
+    "dev": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js --env production"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "browserslist": "> 0.25%, not dead"
 }

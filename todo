@@ -10,4 +10,5 @@
     [+] I. Bug when VirtualNode.ReplaceNode(...)
     [+]  II. Incorrect hook call in ComponentAttribute.Update() at line 52
 [+] 10. 'ref' attribute
-[~]  11. Reduce the number of requests to html
+[~] 11. Reduce the number of requests to html
+[~] 12. loader

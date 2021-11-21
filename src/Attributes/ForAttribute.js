@@ -116,11 +116,15 @@ export default class ForAttribute extends VirtualNodeAttribute {
             source = this.Element.Context.EvalScript(this.#sourceName);
         eval(`
             for (${this.#GetForFunction("source")}) {
-                const index = this.#dynamicElements.length;
-                const element = this.#CreateElement("${this.#targetName}", ${this.#targetName});
-                this.#InsertElement(index, element);
+                this.CreateElements(${this.#targetName});
             }
         `);
+    }
+
+    CreateElements(value) {
+        const index = this.#dynamicElements.length;
+        const element = this.#CreateElement(this.#targetName, value);
+        this.#InsertElement(index, element);
     }
 
     /**
