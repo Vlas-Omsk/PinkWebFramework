@@ -111,11 +111,11 @@ export default class ForAttribute extends VirtualNodeAttribute {
 
     Update() {
         this.#ClearElements();
-        let source;
+        let $source;
         if (this.#type != ForType.Cycle)
-            source = this.Element.Context.EvalScript(this.#sourceName);
+            $source = this.Element.Context.EvalScript(this.#sourceName);
         eval(`
-            for (${this.#GetForFunction("source")}) {
+            for (${this.#GetForFunction("$source")}) {
                 this.CreateElements(${this.#targetName});
             }
         `);
