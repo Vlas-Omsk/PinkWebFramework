@@ -17,10 +17,10 @@ export default class EventAttribute extends VirtualNodeAttribute {
             {
                 const eventName = attributeName.slice(1);
                 this.Element.On(eventName, e => (function(script) {
-                    const result = eval(script, e);
+                    const result = eval(script);
                     if (result instanceof Function)
                         result(e);
-                }).call(this.Element.Context, this.Element.HtmlAttributes[attributeName], e));
+                }).call(this.Element.Context, this.Element.HtmlAttributes[attributeName]));
             }
         }
     }

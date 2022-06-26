@@ -114,6 +114,9 @@ export default class VirtualNode {
         return this.#isVisible;
     }
     set IsVisible(value) {
+        if (this.#isVisible == value)
+            return;
+
         this.#isVisible = value;
         this.UpdateHtml();
     }
@@ -517,9 +520,8 @@ export default class VirtualNode {
             else if (!String.isNullOrEmpty(this.#value))
                 element.nodeValue = this.#value;
             for (let name in this.#htmlAttributes) {
-                if (this.#IsAvailableAttribute(name)) {
+                if (this.#IsAvailableAttribute(name))
                     element.setAttribute(name, this.#htmlAttributes[name]);
-                }
             }
             const innerElements = [];
             for (let element of this.Elements)

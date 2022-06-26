@@ -37,11 +37,13 @@ export default class AttributesInitializer {
                 break;
         }
 
-        for (let i = 0; i < virtualNode.Elements.length; i++) {
-            const element = virtualNode.Elements[i];
-            if (element.IsDynamic)
-                continue;
-            this.InitAttributes(element);
+        if (!virtualNode.IsTemplate) {
+            for (let i = 0; i < virtualNode.Elements.length; i++) {
+                const element = virtualNode.Elements[i];
+                if (element.IsDynamic)
+                    continue;
+                this.InitAttributes(element);
+            }
         }
 
         virtualNode.OnInitialized();
