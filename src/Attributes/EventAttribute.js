@@ -24,4 +24,25 @@ export default class EventAttribute extends VirtualNodeAttribute {
             }
         }
     }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        if (this.#TestEventAttributes(virtualNode.HtmlAttributes))
+            new EventAttribute(virtualNode);
+        return false;
+    }
+
+    /**
+     * @param {Object<string,string>} attributes
+     * @returns {boolean}
+     */
+     static #TestEventAttributes(attributes) {
+        for (let name in attributes)
+            if (name.length > 1 && name[0] == '@')
+                return true;
+        return false;
+    }
 }

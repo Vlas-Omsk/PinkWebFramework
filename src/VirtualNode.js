@@ -22,6 +22,7 @@ export default class VirtualNode {
     /** @type {boolean} */ #isDynamic = false
     /** @type {boolean} */ #isComponent = false
     /** @type {boolean} */ #isSvg = false
+    /** @type {boolean} */ #isVisible = true
     /** @type {FrameworkEventTarget<VirtualNodeEventArgs>} */ #eventTarget = new FrameworkEventTarget()
     /** @type {string[]} */ #registeredEvents = []
 
@@ -107,6 +108,14 @@ export default class VirtualNode {
 
     get IsSvg() {
         return this.#isSvg;
+    }
+
+    get IsVisible() {
+        return this.#isVisible;
+    }
+    set IsVisible(value) {
+        this.#isVisible = value;
+        this.UpdateHtml();
     }
 
     /**
@@ -492,7 +501,7 @@ export default class VirtualNode {
             return;
 
         let element;
-        if (this.#isTemplate) {
+        if (this.#isTemplate || !this.#isVisible) {
             element = document.createComment("");
         } else if (this.#tag == "#text") {
             if (!this.#value)

@@ -55,9 +55,7 @@
         }
     </style>
     <script>
-        // #region Костыль, так как type="module" загружаеться асинхронно
         window.addEventListener("FrameworkInitialization", () => {
-        // #endregion
             window.items = new ObservableArray([
                 "Купить хлеб",
                 "Купить масло",
@@ -72,7 +70,12 @@
     <hr/>
     <div class="todo__container">
         <ul class="todo__items">
-            <component src="TodoItem.html" for="item of items" @remove="e => items.Remove(e.Data)" ref="todo__items"></component>
+            <component
+                src="TodoItem.html"
+                for="item of items"
+                @remove="e => items.Remove(e.Data)"
+                ref="todo__items"
+            ></component>
         </ul>
         <button class="todo__add" @click="this.increment++; this.items.Push('Test' + increment)">Добавить</button>
     </div>

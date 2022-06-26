@@ -62,4 +62,29 @@ export default class ValueAttribute extends VirtualNodeAttribute {
             }
         });
     }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        if (
+            testRegex.test(virtualNode.Value) ||
+            testRegex.test(virtualNode.Tag) ||
+            this.#TestValueAttributes(virtualNode.HtmlAttributes)
+        )
+            new ValueAttribute(virtualNode);
+        return false;
+    }
+
+    /**
+     * @param {Object<string,string>} attributes
+     * @returns {boolean}
+     */
+    static #TestValueAttributes(attributes) {
+        for (let name in attributes)
+            if (testRegex.test(attributes[name]) || testRegex.test(name))
+                return true;
+        return false;
+    }
 }

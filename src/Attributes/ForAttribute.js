@@ -212,6 +212,18 @@ export default class ForAttribute extends VirtualNodeAttribute {
             result += this.#sourceName;
         return result;
     }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        if (virtualNode.HtmlAttributes["for"]) {
+            new ForAttribute(virtualNode);
+            return true;
+        }
+        return false;
+    }
 }
 
 /**

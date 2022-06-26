@@ -9,6 +9,7 @@ import {
 } from "../Exceptions.js";
 import VirtualNode from "../VirtualNode.js";
 import AttributesInitializer from "./AttributesInitializer.js";
+import ForAttribute from "./ForAttribute.js";
 import VirtualNodeAttribute from "./VirtualNodeAttribute.js";
 
 export default class ComponentAttribute extends VirtualNodeAttribute {
@@ -57,7 +58,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
                 if (children.children.length > 1)
                     throw new ComponentCanOnlyContainOneElementException();
                 this.#dynamicElement = this.#CreateElement(children.children[0]);
-                if (!AttributesInitializer.TryInitForAttribute(this.#dynamicElement))
+                if (!ForAttribute.Init(this.#dynamicElement))
                 {
                     this.EvalScript(this.#dynamicElement);
                     AttributesInitializer.InitAttributes(this.#dynamicElement);
@@ -85,6 +86,7 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
      */
     async #LoadStyle(element) {
         const hash = String.hashCode(element.innerHTML);
+
         if (ComponentAttribute.#existingStyleHashes.indexOf(hash) == -1) {
             ComponentAttribute.#existingStyleHashes.push(hash);
 
@@ -189,5 +191,17 @@ export default class ComponentAttribute extends VirtualNodeAttribute {
         const parser = new DOMParser();
         const htmlDoc = parser.parseFromString(response, 'text/html');
         return htmlDoc.body;
+    }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        if (virtualNode.Tag == "component") {
+            new ComponentAttribute(virtualNode);
+            return true;
+        }
+        return false;
     }
 }

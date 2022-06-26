@@ -15,4 +15,25 @@ export default class RefAttribute extends VirtualNodeAttribute {
             }
         }
     }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        if (this.#TestRefAttributes(virtualNode.HtmlAttributes))
+            new RefAttribute(virtualNode);
+        return false;
+    }
+
+    /**
+     * @param {Object<string,string>} attributes
+     * @returns {boolean}
+     */
+    static #TestRefAttributes(attributes) {
+        for (let name in attributes)
+            if (name == "ref")
+                return true;
+        return false;
+    }
 }

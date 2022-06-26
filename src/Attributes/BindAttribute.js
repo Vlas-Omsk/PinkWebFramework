@@ -103,7 +103,7 @@ export default class BindAttribute extends VirtualNodeAttribute {
      * @param {any} value 
      */
     #UpdateClassBind(name, value) {
-        if (this.Element.HtmlElement) {
+        if (this.Element.HtmlElement && this.Element.HtmlElement.classList) {
             const isClaasContains = this.Element.HtmlElement.classList.contains(name);
             if (value && !isClaasContains)
                 this.Element.HtmlElement.classList.add(name);
@@ -117,10 +117,31 @@ export default class BindAttribute extends VirtualNodeAttribute {
      * @param {any} value 
      */
     #UpdateStyleBind(name, value) {
-        if (this.Element.HtmlElement) {
-            if (value.constructor == Number && name in this.Element.HtmlElement.style)
-                value = value + "px";
+        if (this.Element.HtmlElement && this.Element.HtmlElement.style) {
+            if (value?.constructor == Number && name in this.Element.HtmlElement.style)
+                value += "px";
             this.Element.HtmlElement.style[name] = value;
         }
+    }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        if (this.#TestBindAttributes(virtualNode.HtmlAttributes))
+            new BindAttribute(virtualNode);
+        return false;
+    }
+
+    /**
+     * @param {Object<string,string>} attributes
+     * @returns {boolean}
+     */
+    static #TestBindAttributes(attributes) {
+        for (let name in attributes)
+            if ((name.length > 1 && name[0] == ':') || name == "binds")
+                return true;
+        return false;
     }
 }

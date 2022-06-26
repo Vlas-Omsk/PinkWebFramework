@@ -20,6 +20,14 @@ export default class VirtualNodeAttribute {
     }
 
     Update() {
-        throw NotImplementedException();
+        throw new NotImplementedException();
+    }
+
+    /**
+     * @param {VirtualNode} virtualNode 
+     * @returns {boolean}
+     */
+    static Init(virtualNode) {
+        throw new NotImplementedException();
     }
 }
